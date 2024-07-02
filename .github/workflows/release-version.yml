@@ -1,0 +1,15 @@
+name: release-node-api-version
+on:
+  push:
+    branches:
+      - multi_tenant_dev
+      - multi_tenant_stage
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo $branch_name

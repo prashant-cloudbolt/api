@@ -1,0 +1,27 @@
+name: node-api-dev-codedeploy
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["release-node-api-version"]
+    branches:
+      - multi_tenant_dev
+    types:
+      - completed
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  codedeploy:
+    name: Trigger codedeploy with latest commit to Dev Ohio
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo $branch_name
