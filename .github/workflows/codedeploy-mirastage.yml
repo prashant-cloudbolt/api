@@ -1,10 +1,10 @@
-name: node-api-dev-codedeploy
+name: node-api-mirastage-codedeploy
+
 on:
-  workflow_dispatch:
   workflow_run:
     workflows: ["release-node-api-version"]
     branches:
-      - multi_tenant_dev
+      - multi_tenant_stage
     types:
       - completed
 
@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   codedeploy:
-    name: Trigger codedeploy with latest commit to Dev Ohio
+    name: Trigger codedeploy with latest commit to MIRA Stage
     runs-on: ubuntu-latest
     steps:
       - name: Echo Branch name
