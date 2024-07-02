@@ -1,6 +1,9 @@
 name: release-node-api-version
 on:
   workflow_dispatch:
+    inputs:
+      distinct_id:
+        description: "This input required to run the workflow from return-dispatch"
 
 jobs:
   publish:
@@ -10,3 +13,6 @@ jobs:
         run: |
           branch_name="${GITHUB_REF#refs/heads/}"
           echo $branch_name
+
+      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
+        run: echo ${{ github.event.inputs.distinct_id }}
