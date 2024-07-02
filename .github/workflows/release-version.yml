@@ -1,9 +1,6 @@
 name: release-node-api-version
 on:
-  push:
-    branches:
-      - multi_tenant_dev
-      - multi_tenant_stage
+  workflow_dispatch:
 
 jobs:
   publish:
