@@ -14,5 +14,23 @@ jobs:
           branch_name="${GITHUB_REF#refs/heads/}"
           echo $branch_name
 
+      - name: run codedeploy-dev workflow
+        uses: codex-/return-dispatch@v1
+        id: return_dispatch
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          repo: workflow-target
+          owner: prashant-cloudbolt
+          workflow: codedeploy-dev.yml
+
+      - name: Watch codedeploy-dev workflow
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          RUN_ID=${{steps.return_dispatch.outputs.run_id}}
+          gh run watch $RUN_ID --repo prashant-cloudbolt/workflow-target
+
       - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
         run: echo ${{ github.event.inputs.distinct_id }}
