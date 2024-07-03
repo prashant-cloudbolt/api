@@ -38,9 +38,6 @@ jobs:
           RUN_ID=${{steps.return_dispatch.outputs.run_id}}
           gh run watch $RUN_ID --repo prashant-cloudbolt/workflow-target
 
-      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
-        run: echo ${{ github.event.inputs.distinct_id }}
-
   publish_codedeploy_stage:
     if: github.ref == 'refs/heads/multi_tenant_stage'
     runs-on: ubuntu-latest
@@ -73,5 +70,8 @@ jobs:
           RUN_ID=${{steps.return_dispatch.outputs.run_id}}
           gh run watch $RUN_ID --repo prashant-cloudbolt/workflow-target
 
+  signal_pass:
+    runs-on: ubuntu-latest
+    steps:
       - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
         run: echo ${{ github.event.inputs.distinct_id }}
