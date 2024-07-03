@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish_codedeploy_dev:
-    if: github.event.workflow_run.head_branch == 'multi_tenant_dev'
+    if: github.ref == 'refs/heads/multi_tenant_dev'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -42,7 +42,7 @@ jobs:
         run: echo ${{ github.event.inputs.distinct_id }}
 
   publish_codedeploy_stage:
-    if: github.event.workflow_run.head_branch == 'multi_tenant_stage'
+    if: github.ref == 'refs/heads/multi_tenant_stage'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
