@@ -21,9 +21,15 @@ jobs:
           echo $branch_name
 
       - name: run codedeploy-dev workflow
-        run: gh workflow run codedeploy-dev.yml --repo  prashant-cloudbolt/workflow-target --ref multi_tenant_dev
         env:
           GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run codedeploy-dev.yml \
+          --ref=multi_tenant_dev \
+          --repo prashant-cloudbolt/workflow-target
+
+      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
+        run: echo ${{ github.event.inputs.distinct_id }}
 
   publish_codedeploy_stage:
     if: github.ref == 'refs/heads/multi_tenant_stage'
@@ -40,6 +46,12 @@ jobs:
           echo $branch_name
 
       - name: run codedeploy-stage workflow
-        run: gh workflow run codedeploy-mirastage.yml --repo  prashant-cloudbolt/workflow-target --ref multi_tenant_stage
         env:
           GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run codedeploy-mirastage.yml \
+          --ref=multi_tenant_stage \
+          --repo prashant-cloudbolt/workflow-target
+
+      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
+        run: echo ${{ github.event.inputs.distinct_id }}
