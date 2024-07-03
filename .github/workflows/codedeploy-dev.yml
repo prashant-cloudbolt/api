@@ -19,6 +19,10 @@ jobs:
   codedeploy:
     name: Trigger codedeploy with latest commit to Dev Ohio
     runs-on: ubuntu-latest
+
+    environment:
+      name: DEV
+
     steps:
       - uses: actions/checkout@v4
         name: Checkout Repository
@@ -29,3 +33,4 @@ jobs:
         run: |
           branch_name="${GITHUB_REF#refs/heads/}"
           echo $branch_name
+          echo "ENV name is : ${{ vars.ENV }}"
