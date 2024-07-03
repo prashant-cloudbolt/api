@@ -1,12 +1,7 @@
 name: node-api-mirastage-codedeploy
 
 on:
-  workflow_run:
-    workflows: ["release-node-api-version"]
-    branches:
-      - multi_tenant_stage
-    types:
-      - completed
+  workflow_dispatch:
 
 permissions:
   id-token: write 

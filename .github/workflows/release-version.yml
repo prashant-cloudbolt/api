@@ -21,22 +21,9 @@ jobs:
           echo $branch_name
 
       - name: run codedeploy-dev workflow
-        uses: codex-/return-dispatch@v1
-        id: return_dispatch
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          ref: multi_tenant_dev
-          repo: workflow-target
-          owner: prashant-cloudbolt
-          workflow: codedeploy-dev.yml
-
-      - name: Watch codedeploy-dev workflow
-        continue-on-error: true
+        run: gh workflow run codedeploy-dev.yml --repo  prashant-cloudbolt/workflow-target --ref multi_tenant_dev
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          RUN_ID=${{steps.return_dispatch.outputs.run_id}}
-          gh run watch $RUN_ID --repo prashant-cloudbolt/workflow-target
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
 
   publish_codedeploy_stage:
     if: github.ref == 'refs/heads/multi_tenant_stage'
@@ -52,26 +39,7 @@ jobs:
           branch_name="${GITHUB_REF#refs/heads/}"
           echo $branch_name
 
-      - name: run codedeploy-dev workflow
-        uses: codex-/return-dispatch@v1
-        id: return_dispatch
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          ref: multi_tenant_stage
-          repo: workflow-target
-          owner: prashant-cloudbolt
-          workflow: codedeploy-mirastage.yml
-
-      - name: Watch codedeploy-dev workflow
-        continue-on-error: true
+      - name: run codedeploy-stage workflow
+        run: gh workflow run codedeploy-mirastage.yml --repo  prashant-cloudbolt/workflow-target --ref multi_tenant_stage
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          RUN_ID=${{steps.return_dispatch.outputs.run_id}}
-          gh run watch $RUN_ID --repo prashant-cloudbolt/workflow-target
-
-  signal_pass:
-    runs-on: ubuntu-latest
-    steps:
-      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
-        run: echo ${{ github.event.inputs.distinct_id }}
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
