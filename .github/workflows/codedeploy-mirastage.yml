@@ -2,6 +2,9 @@ name: node-api-mirastage-codedeploy
 
 on:
   workflow_dispatch:
+    inputs:
+      distinct_id:
+        description: "This input required to run the workflow from return-dispatch"
 
 permissions:
   id-token: write 
@@ -27,3 +30,6 @@ jobs:
           branch_name="${GITHUB_REF#refs/heads/}"
           echo "branch name is : $branch_name"
           echo "ENV name is : ${{ vars.ENV }}"
+
+      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
+        run: echo ${{ github.event.inputs.distinct_id }}
