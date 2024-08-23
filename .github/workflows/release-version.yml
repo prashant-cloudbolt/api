@@ -48,7 +48,7 @@ jobs:
       - name: Get Latest Tag
         id: version-tag
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           latest_version=$(gh release list --limit 30 | grep -E ${{ steps.determine-branch-suffix.outputs.branch_suffix }} | sort -k4 -r | head -n 1 | awk '{print $1}' | sed 's/.*v//')
           echo "latest_version=$latest_version"
@@ -61,7 +61,7 @@ jobs:
       - name: Get version fragment from branch name (use feature as default if no value found)
         id: get-version-fragment
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           # Extract version fragment:
           version_fragment=$(gh pr list -R CloudboltSoftware/api --state merged | head -n 1 | awk '{print $(NF-2)}' | cut -d"/" -f1)
@@ -90,7 +90,7 @@ jobs:
 
       - name: Create new release
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: >
           gh release create CSMP-${{steps.determine-branch-suffix.outputs.branch_suffix}}-API-v${{ steps.increment-semantic-version.outputs.next-version }} -t CSMP-${{steps.determine-branch-suffix.outputs.branch_suffix}}-API-v${{ steps.increment-semantic-version.outputs.next-version }} --notes-file release_notes.md --prerelease
       
