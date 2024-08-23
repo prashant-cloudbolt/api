@@ -131,12 +131,12 @@ jobs:
           commit_hash=$(gh api repos/${{ github.repository }}/git/ref/tags/$release_tag --jq '.object.sha')
           echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
-        - name: Display Results of Release, Tag, Hash
-          run: |
-            echo "Branch Suffix: ${{ env.branch_suffix }}"
-            echo "Current Release: ${{ env.latest_release }}"
-            echo "Current Release Tag: ${{ env.release_tag }}"
-            echo "Commit Hash of Tag: ${{ env.commit_hash }}"
+      - name: Display Results of Release, Tag, Hash
+        run: |
+          echo "Branch Suffix: ${{ env.branch_suffix }}"
+          echo "Current Release: ${{ env.latest_release }}"
+          echo "Current Release Tag: ${{ env.release_tag }}"
+          echo "Commit Hash of Tag: ${{ env.commit_hash }}"
 
       - name: Trigger Rollback of CodeDeploy
         env:
