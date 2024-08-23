@@ -51,6 +51,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           latest_version=$(gh release list --limit 30 | grep -E ${{ steps.determine-branch-suffix.outputs.branch_suffix }} | sort -k4 -r | head -n 1 | awk '{print $1}' | sed 's/.*v//')
+          echo "latest_version=$latest_version"
           echo "tag=$latest_version" >> $GITHUB_OUTPUT
       
       - name: Read release notes
