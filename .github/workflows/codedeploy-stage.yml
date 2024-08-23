@@ -1,0 +1,50 @@
+name: api-stage-codedeploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - multi_tenant_stage
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  codedeploy:
+    name: Trigger codedeploy with latest commit to Stage
+    runs-on: ubuntu-latest
+
+    environment:
+      name: STAGE
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo "branch name is : $branch_name"
+          echo "ENV name is : ${{ vars.ENV }}"
+
+  release_api_stage:
+    if: github.ref == 'refs/heads/multi_tenant_stage'
+    needs: [codedeploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: multi_tenant_stage
+
+      - name: Run release-version workflow
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run release-version.yml \
+          --ref=multi_tenant_stage \
+          --repo prashant-cloudbolt/api

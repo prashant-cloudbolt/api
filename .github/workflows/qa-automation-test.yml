@@ -23,6 +23,9 @@ jobs:
   qa-tests:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Run maven.yml workflow in qa-automation repository
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -99,26 +102,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: multi_tenant_stage
 
-      - name: Echo Branch name
+      - name: Get Second Last Commit
+        id: last-successful-commit
         run: |
-          branch_name="${GITHUB_REF#refs/heads/}"
-          echo "Branch name is: $branch_name"
+          second_last_commit=$(git rev-parse HEAD~1)
+          echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
 
-      # Uncomment and configure if needed
-      # - name: Get Second Last Commit
-      #   id: last-successful-commit
-      #   run: |
-      #     second_last_commit=$(git rev-parse HEAD~1)
-      #     echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
-
-      # - name: Trigger Rollback
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      #   run: |
-      #     gh workflow run codedeploy-stage.yml \
-      #     --ref=multi_tenant_stage \
-      #     --repo prashant-cloudbolt/api \
-      #     --field commit_hash=${{ env.LAST_COMMIT_SHA }}
+      - name: Trigger Rollback of CodeDeploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run codedeploy-stage.yml \
+          --ref=multi_tenant_stage \
+          --repo prashant-cloudbolt/api \
+          --field commit_hash=${{ env.LAST_COMMIT_SHA }}
