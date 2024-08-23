@@ -71,27 +71,32 @@ jobs:
             Repository: ${{ github.repository }}
             Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} 
 
-  # rollback-on-failure:
-  #   if: ${{ needs.qa-tests.result == 'failure' }}
-  #   needs: qa-tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         ref: multi_tenant_stage
+  codedeploy_rollback:
+    if: ${{ needs.qa-tests.result == 'failure' }}
+    needs: qa-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: multi_tenant_stage
 
-  #     - name: Get Second Last Commit
-  #       id: last-successful-commit
-  #       run: |
-  #         second_last_commit=$(git rev-parse HEAD~1)
-  #         echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo "branch name is : $branch_name"
 
-  #     - name: Trigger Rollback
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  #       run: |
-  #         gh workflow run codedeploy-stage.yml \
-  #         --ref=multi_tenant_stage \
-  #         --repo prashant-cloudbolt/api \
-  #         --field commit_hash=${{ env.LAST_COMMIT_SHA }}
+      # - name: Get Second Last Commit
+      #   id: last-successful-commit
+      #   run: |
+      #     second_last_commit=$(git rev-parse HEAD~1)
+      #     echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
+
+      # - name: Trigger Rollback
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     gh workflow run codedeploy-stage.yml \
+      #     --ref=multi_tenant_stage \
+      #     --repo prashant-cloudbolt/api \
+      #     --field commit_hash=${{ env.LAST_COMMIT_SHA }}
