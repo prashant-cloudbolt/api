@@ -137,15 +137,15 @@ jobs:
 
       - name: Get Commit Hash from Tag
         run: |
-          gitcommit_hash=$(git show $release_tag --pretty=format:"%H" --no-patch)
-          echo "gitcommit_hash=$gitcommit_hash" >> $GITHUB_ENV
+          commit_hash=$(gh api repos/${{ github.repository }}/git/ref/tags/$release_tag --jq '.object.sha')
+          echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
       - name: Display Results
         run: |
           echo "Branch Suffix: ${{ env.branch_suffix }}"
           echo "Latest Release: ${{ env.latest_release }}"
           echo "Release Tag: ${{ env.release_tag }}"
-          echo "Commit Hash: ${{ env.gitcommit_hash }}"
+          echo "Commit Hash: ${{ env.commit_hash }}"
 
 
       # - name: Trigger Rollback of CodeDeploy

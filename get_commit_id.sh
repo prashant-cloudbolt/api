@@ -26,5 +26,15 @@ echo "latest_release=$latest_release"
 
 release_tag=$(gh release view $latest_release --json tagName -q ".tagName")
 echo "release_tag=$release_tag"
-gitcommit_hash=$(git show $release_tag --pretty=format:"%H" --no-patch)
-echo "gitcommit_hash=$gitcommit_hash"
+
+# gitcommit_hash=$(git show $release_tag --pretty=format:"%H" --no-patch)
+# echo "gitcommit_hash=$gitcommit_hash"
+
+# Set your GitHub repository details and tag
+REPO="api"
+OWNER="prashant-cloudbolt"
+
+# Get the commit hash
+COMMIT_HASH=$(gh api repos/$OWNER/$REPO/git/ref/tags/$release_tag --jq '.object.sha')
+
+echo "Commit Hash for tag $release_tag: $COMMIT_HASH"
