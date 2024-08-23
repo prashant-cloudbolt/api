@@ -1,0 +1,52 @@
+name: api-dev-codedeploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - multi_tenant_dev
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  codedeploy:
+    name: Trigger codedeploy with latest commit to Dev Ohio
+    runs-on: ubuntu-latest
+
+    environment:
+      name: DEV
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: multi_tenant_dev
+
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo $branch_name
+          echo "ENV name is : ${{ vars.ENV }}"
+
+  release_api_dev:
+    if: github.ref == 'refs/heads/multi_tenant_dev'
+    needs: [qa-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: multi_tenant_dev
+
+      - name: Run codedeploy-dev workflow
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run release-version.yml \
+          --ref=multi_tenant_dev \
+          --repo prashant-cloudbolt/api

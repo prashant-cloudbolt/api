@@ -1,0 +1,95 @@
+name: release-dependent-codedeploy
+
+on:
+  workflow_run:
+    workflows: ["api-mirastage-codedeploy", "api-dev-codedeploy", "api-stage-codedeploy"]
+    branches:
+      - multi_tenant_dev
+      - multi_tenant_stage
+    types:
+      - completed
+
+jobs:
+  trigger-codedeploy-stage:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.name == 'api-stage-codedeploy' && github.event.workflow_run.conclusion == 'success' }}
+    strategy:
+      matrix:
+        repository:
+          - node-api
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+
+      - name: Run ${{ matrix.repository }} release version workflow
+        uses: codex-/return-dispatch@v1
+        id: return_dispatch
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          repo: ${{ matrix.repository }}
+          owner: prashant-cloudbolt
+          workflow: codedeploy-stage.yml
+
+      - name: Watch ${{ matrix.repository }} release version workflow
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          RUN_ID=${{steps.return_dispatch.outputs.run_id}}
+          gh run watch $RUN_ID --repo prashant-cloudbolt/${{ matrix.repository }}
+
+      - name: Notify failure to Slack
+        uses: act10ns/slack@v2.0.0
+        if: ${{ failure() }} # This ensures the step runs only if the previous steps fail
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }} 
+        with:
+          status: ${{ job.status }}
+          message: |
+            :rotating_light: *Urgent*: Release Dependent CodeDeploy Workflow Failed for API of CSMP-Stage Environment:rotating_light:
+            Repository: ${{ github.repository }}
+            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  trigger-codedeploy-dev:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.name == 'api-dev-codedeploy' && github.event.workflow_run.conclusion == 'success' }}
+    strategy:
+      matrix:
+        repository:
+          - node-api
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+
+      - name: Run ${{ matrix.repository }} release version workflow
+        uses: codex-/return-dispatch@v1
+        id: return_dispatch
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          repo: ${{ matrix.repository }}
+          owner: prashant-cloudbolt
+          workflow: codedeploy-dev.yml
+
+      - name: Watch ${{ matrix.repository }} release version workflow
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          RUN_ID=${{steps.return_dispatch.outputs.run_id}}
+          gh run watch $RUN_ID --repo prashant-cloudbolt/${{ matrix.repository }}
+
+      - name: Notify failure to Slack
+        uses: act10ns/slack@v2.0.0
+        if: ${{ failure() }} # This ensures the step runs only if the previous steps fail
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }} 
+        with:
+          status: ${{ job.status }}
+          message: |
+            :rotating_light: *Urgent*: Release Dependent CodeDeploy Workflow Failed for API of CSMP-DEV Environment :rotating_light:
+            Repository: ${{ github.repository }}
+            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

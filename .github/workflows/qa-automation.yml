@@ -1,15 +1,15 @@
 name: qa-automation
 
 on:
-  push:
-    branches:
-      - multi_tenant_stage
-  # workflow_run:
-  #   workflows: ["release-dependent-codedeploy"]
+  # push:
   #   branches:
   #     - multi_tenant_stage
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["release-dependent-codedeploy"]
+    branches:
+      - multi_tenant_stage
+    types:
+      - completed
 
 permissions:
   id-token: write 

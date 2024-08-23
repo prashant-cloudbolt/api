@@ -6,9 +6,9 @@ on:
       commit_hash:
         description: "This commit_hash we will use to rollback the codedeploy"
         required: false
-  # push:
-  #   branches:
-  #     - multi_tenant_stage
+  push:
+    branches:
+      - multi_tenant_stage
 
 permissions:
   id-token: write 
