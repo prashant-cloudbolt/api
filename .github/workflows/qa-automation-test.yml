@@ -103,23 +103,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get the latest release commit ID using shell script
+      - name: Get Commit Hash from Tag
+        id: commit_hash
         run: |
-          # Fetch the latest release information from the GitHub API
-          latest_release=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
-          echo "latest_release=$latest_release"
-          
-          # Extract the commit ID associated with the latest release
-          commit_id=$(echo $latest_release | jq -r '.target_commitish')
-          
-          # Print the commit ID
-          echo "The commit ID for the latest release is: $commit_id"
+          branch_name="${GITHUB_REF#refs/heads/}"
+          case $branch_name in
+            multi_tenant_*)
+              branch_suffix=$(echo "$branch_name" | sed 's/multi_tenant_//; s/-//g')
+              ;;
+            mira-stage)
+              branch_suffix="STAGE"
+              ;;
+            *)
+              echo "Unsupported branch: $branch_name"
+              exit 1
+              ;;
+          esac
 
-      # - name: Get Second Last Commit
-      #   id: last-successful-commit
-      #   run: |
-      #     second_last_commit=$(git rev-parse HEAD~1)
-      #     echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
+          # Convert suffix to uppercase
+          branch_suffix=$(tr '[:lower:]' '[:upper:]' <<< "$branch_suffix")
+
+          # Fetching latest release
+          latest_release=$(gh release list --limit 30 | grep -E "$branch_suffix" | sort -k4 -r | head -n 1 | awk '{print $1}')
+
+          # Fetching release tag
+          release_tag=$(gh release view $latest_release --json tagName -q ".tagName")
+
+          # Fetching git hash of tag
+          commit_hash=$(git show $release_tag --pretty=format:"%H" --no-patch)
+          echo "commit_hash=$commit_hash" >> $GITHUB_ENV
+
+      - name: Display Results
+        run: |
+          echo "Commit Hash: ${{ env.commit_hash }}"
 
       # - name: Trigger Rollback of CodeDeploy
       #   env:
