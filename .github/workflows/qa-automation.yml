@@ -52,7 +52,7 @@ jobs:
 
   #     - name: Trigger Rollback
   #       env:
-  #         GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
   #       run: |
   #         gh workflow run codedeploy-stage.yml \
   #         --ref=multi_tenant_stage \
