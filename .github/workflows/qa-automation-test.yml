@@ -1,16 +1,16 @@
 name: qa-automation
 
 on:
-  # push:
-  #   branches:
-  #     - multi_tenant_stage
-  #     - multi_tenant_dev
-  workflow_run:
-    workflows: ["release-dependent-codedeploy"]
+  push:
     branches:
       - multi_tenant_stage
-    types:
-      - completed
+      - multi_tenant_dev
+  # workflow_run:
+  #   workflows: ["release-dependent-codedeploy"]
+  #   branches:
+  #     - multi_tenant_stage
+  #   types:
+  #     - completed
 
 permissions:
   id-token: write 
@@ -20,93 +20,100 @@ permissions:
   actions: read
 
 jobs:
-  qa-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # qa-tests:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Run maven.yml workflow in qa-automation repository
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          gh workflow run maven.yml --repo prashant-cloudbolt/qa-automation
+  #     - name: Run maven.yml workflow in qa-automation repository
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #       run: |
+  #         gh workflow run maven.yml --repo prashant-cloudbolt/qa-automation
 
-      - name: Get Workflow Run ID of maven.yml workflow
-        id: get_run_id
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          max_attempts=5  # Maximum number of attempts to retrieve the workflow run ID
-          attempt=0
-          workflow_list=""
+  #     - name: Get Workflow Run ID of maven.yml workflow
+  #       id: get_run_id
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #       run: |
+  #         max_attempts=5  # Maximum number of attempts to retrieve the workflow run ID
+  #         attempt=0
+  #         workflow_list=""
 
-          while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
-            echo "Attempt $(($attempt+1)) to retrieve workflow run ID"
-            workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --branch=multi_tenant_stage --limit=1 --json databaseId)
+  #         while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
+  #           echo "Attempt $(($attempt+1)) to retrieve workflow run ID"
+  #           workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --branch=multi_tenant_stage --limit=1 --json databaseId)
             
-            if [ -z "$workflow_list" ]; then
-              echo "Workflow run ID not yet available. Retrying..."
-              attempt=$(($attempt + 1))
-              sleep 10  # Wait for a short time before retrying
-            else
-              echo "Workflow run ID retrieved successfully."
-            fi
-          done
+  #           if [ -z "$workflow_list" ]; then
+  #             echo "Workflow run ID not yet available. Retrying..."
+  #             attempt=$(($attempt + 1))
+  #             sleep 10  # Wait for a short time before retrying
+  #           else
+  #             echo "Workflow run ID retrieved successfully."
+  #           fi
+  #         done
 
-          if [ -z "$workflow_list" ]; then
-            echo "Failed to retrieve workflow run ID after $max_attempts attempts"
-            exit 1
-          fi
+  #         if [ -z "$workflow_list" ]; then
+  #           echo "Failed to retrieve workflow run ID after $max_attempts attempts"
+  #           exit 1
+  #         fi
 
-          run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
-          echo "run_id=$run_id" >> $GITHUB_ENV
+  #         run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
+  #         echo "run_id=$run_id" >> $GITHUB_ENV
 
 
-      - name: Check Target Workflow Status of maven.yml
-        id: check_status
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          status=""
-          while [ "$status" != "completed" ]; do
-            status=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
-            echo "Current status: $status"
-            if [ "$status" == "completed" ]; then
-              conclusion=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
-              echo "Final conclusion: $conclusion"
-              if [ "$conclusion" != "success" ]; then
-                echo "Target workflow failed. Failing source workflow."
-                exit 1
-              fi
-            fi
-            sleep 15  # Increased sleep to reduce API calls
-          done
+  #     - name: Check Target Workflow Status of maven.yml
+  #       id: check_status
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #       run: |
+  #         status=""
+  #         while [ "$status" != "completed" ]; do
+  #           status=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
+  #           echo "Current status: $status"
+  #           if [ "$status" == "completed" ]; then
+  #             conclusion=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
+  #             echo "Final conclusion: $conclusion"
+  #             if [ "$conclusion" != "success" ]; then
+  #               echo "Target workflow failed. Failing source workflow."
+  #               exit 1
+  #             fi
+  #           fi
+  #           sleep 15  # Increased sleep to reduce API calls
+  #         done
 
-      - name: Notify failure to Slack
-        uses: act10ns/slack@v2.0.0
-        if: ${{ failure() }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
-        with:
-          status: ${{ job.status }}
-          message: |
-            :rotating_light: *QA Tests Failed*: API Deployment for CSMP-STAGE Environment
-            Repository: ${{ github.repository }}
-            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  #     - name: Notify failure to Slack
+  #       uses: act10ns/slack@v2.0.0
+  #       if: ${{ failure() }}
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+  #       with:
+  #         status: ${{ job.status }}
+  #         message: |
+  #           :rotating_light: *QA Tests Failed*: API Deployment for CSMP-STAGE Environment
+  #           Repository: ${{ github.repository }}
+  #           Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   codedeploy_rollback:
-    if: ${{ always() && needs.qa-tests.result == 'failure' }}
-    needs: qa-tests
+    # if: ${{ always() && needs.qa-tests.result == 'failure' }}
+    # needs: qa-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Echo Branch name
+      - name: Get the latest release commit ID using shell script
         run: |
-          branch_name="${GITHUB_REF#refs/heads/}"
-          echo $branch_name
+          # Fetch the latest release information from the GitHub API
+          latest_release=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
+          echo "latest_release=$latest_release"
+          
+          # Extract the commit ID associated with the latest release
+          commit_id=$(echo $latest_release | jq -r '.target_commitish')
+          
+          # Print the commit ID
+          echo "The commit ID for the latest release is: $commit_id"
 
       # - name: Get Second Last Commit
       #   id: last-successful-commit
