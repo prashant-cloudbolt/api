@@ -103,17 +103,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get Second Last Commit
-        id: last-successful-commit
+      - name: Echo Branch name
         run: |
-          second_last_commit=$(git rev-parse HEAD~1)
-          echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo $branch_name
 
-      - name: Trigger Rollback of CodeDeploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          gh workflow run codedeploy-stage.yml \
-          --ref=multi_tenant_stage \
-          --repo prashant-cloudbolt/api \
-          --field commit_hash=${{ env.LAST_COMMIT_SHA }}
+      # - name: Get Second Last Commit
+      #   id: last-successful-commit
+      #   run: |
+      #     second_last_commit=$(git rev-parse HEAD~1)
+      #     echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
+
+      # - name: Trigger Rollback of CodeDeploy
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     gh workflow run codedeploy-stage.yml \
+      #     --ref=multi_tenant_stage \
+      #     --repo prashant-cloudbolt/api \
+      #     --field commit_hash=${{ env.LAST_COMMIT_SHA }}
