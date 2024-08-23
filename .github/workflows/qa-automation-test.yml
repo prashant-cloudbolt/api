@@ -93,7 +93,7 @@ jobs:
             Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   codedeploy_rollback:
-    if: ${{ needs.qa-tests.result == 'failure' }}
+    if: ${{ always() && needs.qa-tests.result == 'failure' }}
     needs: qa-tests
     runs-on: ubuntu-latest
     steps:
