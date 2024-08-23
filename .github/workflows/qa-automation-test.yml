@@ -103,9 +103,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install GitHub CLI
-        uses: cli/cli-action@v3
-
       - name: Get Commit Hash from Tag
         id: commit_hash
         env:
