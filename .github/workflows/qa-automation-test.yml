@@ -135,7 +135,9 @@ jobs:
           # commit_hash=$(git show $release_tag --pretty=format:"%H" --no-patch)
           # echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
-      - name: Get Commit Hash from Tag
+      - name: Get Commit Hash from Tag2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           commit_hash=$(gh api repos/${{ github.repository }}/git/ref/tags/$release_tag --jq '.object.sha')
           echo "commit_hash=$commit_hash" >> $GITHUB_ENV
