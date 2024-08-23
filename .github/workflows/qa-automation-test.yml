@@ -131,12 +131,12 @@ jobs:
           commit_hash=$(gh api repos/${{ github.repository }}/git/ref/tags/$release_tag --jq '.object.sha')
           echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
-      - name: Display Results of Release, Tag, Hash
-        run: |
-          echo "Branch Suffix: ${{ env.branch_suffix }}"
-          echo "Current Release: ${{ env.latest_release }}"
-          echo "Current Release Tag: ${{ env.release_tag }}"
-          echo "Commit Hash of Tag: ${{ env.commit_hash }}"
+        - name: Display Results of Release, Tag, Hash
+          run: |
+            echo "Branch Suffix: ${{ env.branch_suffix }}"
+            echo "Current Release: ${{ env.latest_release }}"
+            echo "Current Release Tag: ${{ env.release_tag }}"
+            echo "Commit Hash of Tag: ${{ env.commit_hash }}"
 
       # - name: Trigger Rollback of CodeDeploy
       #   env:
@@ -163,22 +163,4 @@ jobs:
         run: |
           gh workflow run release-version.yml \
           --ref=multi_tenant_stage \
-          --repo prashant-cloudbolt/api
-
-  release_api_dev:
-    if: ${{ github.ref == 'refs/heads/multi_tenant_dev' && always() && needs.qa-tests.result == 'success' }}  # Runs if `qa-tests` succeeds and branch is `multi_tenant_dev`
-    needs: [qa-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: multi_tenant_dev
-
-      - name: Run codedeploy-dev workflow
-        env:
-          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
-        run: |
-          gh workflow run release-version.yml \
-          --ref=multi_tenant_dev \
           --repo prashant-cloudbolt/api
