@@ -35,7 +35,7 @@ jobs:
 
   release_api_dev:
     if: github.ref == 'refs/heads/multi_tenant_dev'
-    needs: [qa-tests]
+    needs: codedeploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
