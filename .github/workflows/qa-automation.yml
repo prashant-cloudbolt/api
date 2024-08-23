@@ -26,13 +26,24 @@ jobs:
           gh workflow run maven.yml \
           --repo prashant-cloudbolt/qa-automation
 
-      - name: Watch maven.yml workflow run
-        env:
-          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+      - name: Check Target Workflow Status
+        id: check_status
         run: |
-          RUN_ID=$(gh run list --workflow=maven.yml --repo prashant-cloudbolt/qa-automation --limit=1 --json databaseId --jq '.[0].databaseId')
-          gh run watch $RUN_ID --repo prashant-cloudbolt/qa-automation \
-          || exit 1  
+          gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --limit=1 > result.txt
+          if grep -q "completed" result.txt; then
+            echo "Target workflow has been executed. Failing the source workflow."
+            exit 1
+          else
+            echo "Target workflow has not been executed."
+          fi
+
+      # - name: Watch maven.yml workflow run
+      #   env:
+      #     GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     RUN_ID=$(gh run list --workflow=maven.yml --repo prashant-cloudbolt/qa-automation --limit=1 --json databaseId --jq '.[0].databaseId')
+      #     gh run watch $RUN_ID --repo prashant-cloudbolt/qa-automation \
+      #     || exit 1  
 
   # rollback-on-failure:
   #   if: ${{ needs.qa-tests.result == 'failure' }}
