@@ -28,6 +28,8 @@ jobs:
 
       - name: Check Target Workflow Status
         id: check_status
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
         run: |
           gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --limit=1 > result.txt
           if grep -q "completed" result.txt; then
