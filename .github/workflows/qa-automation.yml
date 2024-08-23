@@ -1,0 +1,60 @@
+name: qa-automation
+
+on:
+  workflow_run:
+    workflows: ["release-dependent-codedeploy"]
+    branches:
+      - multi_tenant_stage
+    types:
+      - completed
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  qa-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run maven.yml workflow in qa-automation repository
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run maven.yml \
+          --repo prashant-cloudbolt/qa-automation
+
+      - name: Watch maven.yml workflow run
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          RUN_ID=$(gh run list --workflow=maven.yml --repo prashant-cloudbolt/qa-automation --limit=1 --json databaseId --jq '.[0].databaseId')
+          gh run watch $RUN_ID --repo prashant-cloudbolt/qa-automation \
+          || exit 1  
+
+  # rollback-on-failure:
+  #   if: ${{ needs.qa-tests.result == 'failure' }}
+  #   needs: qa-tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: multi_tenant_stage
+
+  #     - name: Get Second Last Commit
+  #       id: last-successful-commit
+  #       run: |
+  #         second_last_commit=$(git rev-parse HEAD~1)
+  #         echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
+
+  #     - name: Trigger Rollback
+  #       env:
+  #         GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+  #       run: |
+  #         gh workflow run codedeploy-stage.yml \
+  #         --ref=multi_tenant_stage \
+  #         --repo prashant-cloudbolt/api \
+  #         --field commit_hash=${{ env.LAST_COMMIT_SHA }}
