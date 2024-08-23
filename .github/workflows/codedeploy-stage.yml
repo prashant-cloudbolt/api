@@ -2,8 +2,6 @@ name: api-stage-codedeploy
 
 on:
   workflow_dispatch:
-    inputs:
-      commit_hash:
   push:
     branches:
       - multi_tenant_stage
