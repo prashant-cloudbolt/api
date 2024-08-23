@@ -2,6 +2,10 @@ name: api-stage-codedeploy
 
 on:
   workflow_dispatch:
+    inputs:
+      commit_hash:
+        description: "This commit_hash we will use to rollback the codedeploy"
+        required: false
   push:
     branches:
       - multi_tenant_stage
@@ -30,3 +34,10 @@ jobs:
           branch_name="${GITHUB_REF#refs/heads/}"
           echo "branch name is : $branch_name"
           echo "ENV name is : ${{ vars.ENV }}"
+          if [ -z "$commit_hash" ]; then
+            commit_hash=$(git rev-parse HEAD)
+          else
+            commit_hash=${{ github.event.inputs.commit_hash }}
+          fi
+
+          echo "commit_hash=$commit_hash"

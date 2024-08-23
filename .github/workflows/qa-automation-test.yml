@@ -138,14 +138,14 @@ jobs:
             echo "Current Release Tag: ${{ env.release_tag }}"
             echo "Commit Hash of Tag: ${{ env.commit_hash }}"
 
-      # - name: Trigger Rollback of CodeDeploy
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      #   run: |
-      #     gh workflow run codedeploy-stage.yml \
-      #     --ref=multi_tenant_stage \
-      #     --repo prashant-cloudbolt/api \
-      #     --field commit_hash=${{ env.LAST_COMMIT_SHA }}
+      - name: Trigger Rollback of CodeDeploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run codedeploy-stage.yml \
+          --ref=multi_tenant_stage \
+          --repo prashant-cloudbolt/api \
+          --field commit_hash=${{ env.commit_hash }}
 
   release_api_stage:
     if: ${{ github.ref == 'refs/heads/multi_tenant_stage' && always() && needs.qa-tests.result == 'success' }}  # Runs if `qa-tests` succeeds and branch is `multi_tenant_stage`
