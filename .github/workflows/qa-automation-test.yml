@@ -105,6 +105,8 @@ jobs:
 
       - name: Get Commit Hash from Tag
         id: commit_hash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           branch_name="${GITHUB_REF#refs/heads/}"
           case $branch_name in
