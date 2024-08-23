@@ -33,7 +33,7 @@ jobs:
       - name: Get Workflow Run ID of maven.yml workflow
         id: get_run_id
         env:
-          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN 
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --branch=multi_tenant_stage --limit=1 --json databaseId)
           run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
