@@ -1,0 +1,93 @@
+name: qa-automation
+
+on:
+  workflow_run:
+    workflows: ["release-dependent-codedeploy"]
+    branches:
+      - multi_tenant_stage
+    types:
+      - completed
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  qa-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run maven.yml workflow in qa-automation repository
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run maven.yml \
+          --repo prashant-cloudbolt/qa-automation
+
+      - name: Get Workflow Run ID of maven.yml workflow
+        id: get_run_id
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN 
+        run: |
+          workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --branch=multi_tenant_stage --limit=1 --json databaseId)
+          run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
+          echo "run_id=$run_id" >> $GITHUB_ENV
+
+      - name: Check Target Workflow Status of maven.yml
+        id: check_status
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        run: |
+          status=""
+          while [ "$status" != "completed" ]; do
+            status=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
+            echo "Current status: $status"
+            if [ "$status" == "completed" ]; then
+              conclusion=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
+              echo "Final conclusion: $conclusion"
+              if [ "$conclusion" != "success" ]; then
+                echo "Target workflow failed. Failing source workflow."
+                exit 1
+              fi
+            fi
+            sleep 10
+          done
+
+      - name: Notify failure to Slack
+        uses: act10ns/slack@v2.0.0
+        if: ${{ failure() }} # This ensures the step runs only if the previous steps fail
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }} 
+        with:
+          status: ${{ job.status }}
+          message: |
+            :rotating_light: *QA Tests Failed*: API Deployment for CSMP-STAGE Environment
+            Repository: ${{ github.repository }}
+            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} 
+
+  # rollback-on-failure:
+  #   if: ${{ needs.qa-tests.result == 'failure' }}
+  #   needs: qa-tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: multi_tenant_stage
+
+  #     - name: Get Second Last Commit
+  #       id: last-successful-commit
+  #       run: |
+  #         second_last_commit=$(git rev-parse HEAD~1)
+  #         echo "LAST_COMMIT_SHA=$second_last_commit" >> $GITHUB_ENV
+
+  #     - name: Trigger Rollback
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #       run: |
+  #         gh workflow run codedeploy-stage.yml \
+  #         --ref=multi_tenant_stage \
+  #         --repo prashant-cloudbolt/api \
+  #         --field commit_hash=${{ env.LAST_COMMIT_SHA }}
