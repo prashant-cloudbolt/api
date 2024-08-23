@@ -1,0 +1,34 @@
+name: api-dev-codedeploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - multi_tenant_dev
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  codedeploy:
+    name: Trigger codedeploy with latest commit to Dev Ohio
+    runs-on: ubuntu-latest
+
+    environment:
+      name: DEV
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: multi_tenant_dev
+
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo $branch_name
+          echo "ENV name is : ${{ vars.ENV }}"
