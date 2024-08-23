@@ -103,6 +103,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install GitHub CLI
+        uses: cli/cli-action@v3
+
       - name: Get Commit Hash from Tag
         id: commit_hash
         env:
@@ -133,13 +136,13 @@ jobs:
           release_tag=$(gh release view $latest_release --json tagName -q ".tagName")
           echo "release_tag=$release_tag"
 
-      #     # Fetching git hash of tag
-      #     commit_hash=$(git show $release_tag --pretty=format:"%H" --no-patch)
-      #     echo "commit_hash=$commit_hash" >> $GITHUB_ENV
+          # Fetching git hash of tag
+          commit_hash=$(git show $release_tag --pretty=format:"%H" --no-patch)
+          echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
-      # - name: Display Results
-      #   run: |
-      #     echo "Commit Hash: ${{ env.commit_hash }}"
+      - name: Display Results
+        run: |
+          echo "Commit Hash: ${{ env.commit_hash }}"
 
       # - name: Trigger Rollback of CodeDeploy
       #   env:
