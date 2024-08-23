@@ -1,9 +1,6 @@
 name: qa-automation
 
 on:
-  # push:
-  #   branches:
-  #     - multi_tenant_stage
   workflow_run:
     workflows: ["release-dependent-codedeploy"]
     branches:
@@ -148,7 +145,7 @@ jobs:
           gh workflow run codedeploy-stage.yml \
           --ref=multi_tenant_stage \
           --repo prashant-cloudbolt/api \
-          -f commit_hash=${{ env.commit_hash }}
+          --field commit_hash=${{ env.commit_hash }}
 
   release_api_stage:
     if: ${{ github.ref == 'refs/heads/multi_tenant_stage' && always() && needs.qa-tests.result == 'success' }}  # Runs if `qa-tests` succeeds and branch is `multi_tenant_stage`
