@@ -149,7 +149,7 @@ jobs:
 
   release_api_stage:
     if: ${{ github.ref == 'refs/heads/multi_tenant_stage' && always() && needs.qa-tests.result == 'success' }}  # Runs if `qa-tests` succeeds and branch is `multi_tenant_stage`
-    needs: [codedeploy]
+    needs: [qa-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -167,7 +167,7 @@ jobs:
 
   release_api_dev:
     if: ${{ github.ref == 'refs/heads/multi_tenant_dev' && always() && needs.qa-tests.result == 'success' }}  # Runs if `qa-tests` succeeds and branch is `multi_tenant_dev`
-    needs: [codedeploy]
+    needs: [qa-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
