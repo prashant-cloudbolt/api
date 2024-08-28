@@ -145,7 +145,8 @@ jobs:
           gh workflow run codedeploy-stage.yml \
           --ref=multi_tenant_stage \
           --repo prashant-cloudbolt/api \
-          --field commit_hash=${{ env.commit_hash }}
+          --field commit_hash=${{ env.commit_hash }} \
+          --field codedeploy_rollback="False"
 
   release_api_stage:
     if: ${{ github.ref == 'refs/heads/multi_tenant_stage' && always() && needs.qa-tests.result == 'success' }}  # Runs if `qa-tests` succeeds and branch is `multi_tenant_stage`

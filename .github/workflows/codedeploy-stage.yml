@@ -6,6 +6,10 @@ on:
       commit_hash:
         description: "This commit_hash we will use to rollback the codedeploy"
         required: false
+      codedeploy_rollback:
+        description: "This commit_hash we will use to rollback the codedeploy"
+        required: true
+        default: 'false'
   push:
     branches:
       - multi_tenant_stage
@@ -18,7 +22,7 @@ permissions:
   actions: read
 
 jobs:
-  codedeploy:
+  api_codedeploy:
     name: Trigger codedeploy with latest commit to Stage
     runs-on: ubuntu-latest
 
@@ -42,3 +46,43 @@ jobs:
           fi
 
           echo "commit_hash=$commit_hash"
+
+  release-dependent-codedeploy:
+    name: "Release Dependent Codedeploy"
+    needs: api_codedeploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Capture codedeploy_rollback
+        run: echo "codedeploy_rollback=${{ inputs.codedeploy_rollback }}" >> $GITHUB_ENV
+
+      - name: Use codedeploy_rollback input
+        run: echo "Rollback input is ${{ inputs.codedeploy_rollback }}"
+
+      - name: Trigger release-dependent-codedeploy.yml
+        id: trigger_workflow
+        run: |
+          run_id=$(gh workflow run release-dependent-codedeploy.yml \
+            -f codedeploy_rollback=${{ env.codedeploy_rollback }} \
+            --json id -q '.id')
+          echo "run_id=${run_id}" >> $GITHUB_ENV
+
+
+      - name: Echo Run_ID
+        run: echo "Run ID= ${{ env.run_id }}"
+
+      - name: Watch workflow run
+        id: watch_workflow
+        run: |
+          gh run watch ${{ env.run_id }}
+
+      - name: Notify failure to Slack
+        uses: act10ns/slack@v2.0.0
+        if: ${{ failure() }} # This ensures the step runs only if the previous steps fail
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }} 
+        with:
+          status: ${{ job.status }}
+          message: |
+            :rotating_light: *Urgent*: Release Dependent CodeDeploy Workflow Failed for API of CSMP-Stage Environment:rotating_light:
+            Repository: ${{ github.repository }}
+            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
