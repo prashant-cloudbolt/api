@@ -103,7 +103,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh run watch ${{ env.run_id }}
+          gh run watch ${{ env.run_id }} --repo prashant-cloudbolt/api
 
       - name: Notify failure to Slack
         uses: act10ns/slack@v2.0.0
