@@ -63,6 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh workflow run release-dependent-codedeploy.yml \
+          --repo prashant-cloudbolt/api \
           --field codedeploy_rollback=${{ env.codedeploy_rollback }}
 
       - name: Get Workflow Run ID of release-dependent-codedeploy.yml workflow
@@ -76,7 +77,7 @@ jobs:
 
           while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
             echo "Attempt $(($attempt+1)) to retrieve workflow run ID"
-            workflow_list=$(gh run list --workflow=maven.yml --limit=1 --json databaseId)
+            workflow_list=$(gh run list --repo prashant-cloudbolt/api --workflow=release-dependent-codedeploy.yml --limit=1 --json databaseId)
             
             if [ -z "$workflow_list" ]; then
               echo "Workflow run ID not yet available. Retrying..."
