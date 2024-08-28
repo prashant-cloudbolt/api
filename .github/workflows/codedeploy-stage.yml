@@ -100,7 +100,8 @@ jobs:
         run: echo "Run ID= ${{ env.run_id }}"
 
       - name: Watch workflow run of release-dependent-codedeploy.yml
-        id: watch_workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh run watch ${{ env.run_id }}
 
