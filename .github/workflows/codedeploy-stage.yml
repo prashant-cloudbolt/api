@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   api_codedeploy:
-    name: Trigger codedeploy with latest commit to Stage
+    name: Trigger codedeploy of API to Stage
     runs-on: ubuntu-latest
 
     environment:
@@ -59,7 +59,8 @@ jobs:
         run: echo "Rollback input is ${{ inputs.codedeploy_rollback }}"
 
       - name: Trigger release-dependent-codedeploy.yml
-        id: trigger_workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh workflow run release-dependent-codedeploy.yml \
           --field codedeploy_rollback=${{ env.codedeploy_rollback }}
