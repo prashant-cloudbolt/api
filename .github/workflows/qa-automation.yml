@@ -26,9 +26,7 @@ jobs:
   qa-tests:
     runs-on: ubuntu-latest
     outputs:
-      status:
-        description: 'The final status of the target workflow'
-        value: ${{ steps.check_status.outputs.status }}
+      job_status: ${{ steps.check_status.outputs.status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -85,10 +83,10 @@ jobs:
               echo "Final conclusion: $conclusion"
               if [ "$conclusion" != "success" ]; then
                 echo "Target workflow failed. Failing source workflow."
-                echo "::set-output name=status::failure"  # Set output as failure
+                echo "status=failure" >> $GITHUB_OUTPUT # Set output as failure
                 exit 1
               else
-                echo "::set-output name=status::success"  # Set output as success
+                echo "status=success" >> $GITHUB_OUTPUT # Set output as success
               fi
             fi
             sleep 15  # Increased sleep to reduce API calls
