@@ -2,11 +2,11 @@ name: qa-automation
 
 on:
   workflow_call:
-    secrets:
-      GH_TOKEN:
-        required: true
-      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK:
-        required: true
+    # secrets:
+    #   GH_TOKEN:
+    #     required: true
+    #   SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK:
+    #     required: true
     outputs:
       job_status:
         description: "QA Automation job status"

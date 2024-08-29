@@ -17,30 +17,40 @@ jobs:
   codedeploy_dev:
     if: github.ref == 'refs/heads/multi_tenant_dev'
     uses: ./.github/workflows/codedeploy-dev.yml
+    secrets: inherit
 
   codedeploy_stage:
     if: github.ref == 'refs/heads/multi_tenant_stage'
     uses: ./.github/workflows/codedeploy-stage.yml
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+    secrets: inherit
+      # GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      # SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
 
   qa-automation:
     if: github.ref == 'refs/heads/multi_tenant_stage'
     needs: [codedeploy_stage]
     uses: ./.github/workflows/qa-automation.yml
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+    secrets: inherit
+      # GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      # SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
 
-  status:
-    needs: [qa-automation]
-    runs-on: ubuntu-latest
+  codedeploy_rollback_stage:
+    if: github.ref == 'refs/heads/multi_tenant_stage'
+    uses: ./.github/workflows/codedeploy-stage.yml
+    with:
+      codedeploy_rollback: "True"
+    secrets: inherit
+        # GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        # SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
 
-    steps:
-      - uses: actions/checkout@v4
-        name: Checkout Repository
+  # status:
+  #   needs: [qa-automation]
+  #   runs-on: ubuntu-latest
 
-      - name: QA Automation status
-        run: |
-          echo "QA Automation status is: ${{ needs.qa-automation.outputs.job_status }}"
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       name: Checkout Repository
+
+  #     - name: QA Automation status
+  #       run: |
+  #         echo "QA Automation status is: ${{ needs.qa-automation.outputs.job_status }}"

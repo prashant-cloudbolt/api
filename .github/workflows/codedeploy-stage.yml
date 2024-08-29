@@ -2,28 +2,17 @@ name: api-stage-codedeploy
 
 on:
   workflow_dispatch:
-    inputs:
-      commit_hash:
-        description: "This commit_hash we will use to rollback the codedeploy"
-        required: false
-      codedeploy_rollback:
-        description: "Trigger rollback in dependent workflow if value if True"
-        required: false
   workflow_call:
     inputs:
-      commit_hash:
-        description: "This commit_hash we will use to rollback the codedeploy"
-        required: false
-        type: string
       codedeploy_rollback:
         description: "Trigger rollback in dependent workflow if value if True"
         required: false
         type: string
-    secrets:
-      GH_TOKEN:
-        required: true
-      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK:
-        required: true
+    # secrets:
+    #   GH_TOKEN:
+    #     required: true
+    #   SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK:
+    #     required: true
 
 permissions:
   id-token: write 
@@ -44,16 +33,57 @@ jobs:
       - uses: actions/checkout@v4
         name: Checkout Repository
 
-      - name: Echo Branch name
+      - name: Get Commit Hash from Tag
+        if: ${{ github.event.inputs.codedeploy_rollback == 'True' }}
+        id: commit_hash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          case $branch_name in
+            multi_tenant_*)
+              branch_suffix=$(echo "$branch_name" | sed 's/multi_tenant_//; s/-//g')
+              ;;
+            mira-stage)
+              branch_suffix="STAGE"
+              ;;
+            *)
+              echo "Unsupported branch: $branch_name"
+              exit 1
+              ;;
+          esac
+
+          # Convert suffix to uppercase
+          branch_suffix=$(tr '[:lower:]' '[:upper:]' <<< "$branch_suffix")
+          echo "branch_suffix=$branch_suffix" >> $GITHUB_ENV
+
+          latest_release=$(gh release list --limit 30 | grep -E "$branch_suffix" | sort -k4 -r | head -n 1 | awk '{print $1}')
+          echo "latest_release=$latest_release" >> $GITHUB_ENV
+
+          release_tag=$(gh release view $latest_release --json tagName -q ".tagName")
+          echo "release_tag=$release_tag" >> $GITHUB_ENV
+
+          commit_hash=$(gh api repos/${{ github.repository }}/git/ref/tags/$release_tag --jq '.object.sha')
+          echo "commit_hash=$commit_hash" >> $GITHUB_ENV
+
+      - name: Display Results of Release, Tag, Hash
+        if: ${{ github.event.inputs.codedeploy_rollback == 'True' }}
+        run: |
+          echo "Branch Suffix: ${{ env.branch_suffix }}"
+          echo "Current Release: ${{ env.latest_release }}"
+          echo "Current Release Tag: ${{ env.release_tag }}"
+          echo "Commit Hash of Tag: ${{ env.commit_hash }}"
+
+      - name: echo git hash
         run: |
           branch_name="${GITHUB_REF#refs/heads/}"
           echo "branch name is : $branch_name"
           echo "ENV name is : ${{ vars.ENV }}"
 
-          if [ -z "${{ github.event.inputs.commit_hash }}" ]; then
+          if [ -z "${{ env.commit_hash }}" ]; then
             commit_hash=$(git rev-parse HEAD)
           else
-            commit_hash=${{ github.event.inputs.commit_hash }}
+            commit_hash=${{ env.commit_hash }}
           fi
 
           echo "commit_hash=$commit_hash"
