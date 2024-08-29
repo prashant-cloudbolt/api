@@ -32,7 +32,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.GH_TOKEN }}
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: "multi_tenant_stage"
           repo: ${{ matrix.repository }}
           owner: prashant-cloudbolt
           workflow: codedeploy-stage.yml
@@ -74,7 +74,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.GH_TOKEN }}
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: "multi_tenant_dev"
           repo: ${{ matrix.repository }}
           owner: prashant-cloudbolt
           workflow: codedeploy-dev.yml
