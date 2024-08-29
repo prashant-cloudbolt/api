@@ -1,5 +1,4 @@
-# .github/workflows/main-workflow.yml
-name: Main Workflow
+name: Call a reusable workflow and use its outputs
 
 on:
   push:
@@ -8,12 +7,11 @@ on:
       - multi_tenant_stage
 
 jobs:
-  call-reusable-workflow:
+  job1:
     uses: ./.github/workflows/reusable-workflow.yml
 
-  use-output:
+  job2:
     runs-on: ubuntu-latest
-    needs: call-reusable-workflow
+    needs: job1
     steps:
-      - name: Use output from reusable workflow
-        run: echo "Output from reusable workflow ${{ needs.call-reusable-workflow.outputs.example_output }}"
+      - run: echo ${{ needs.job1.outputs.firstword }} ${{ needs.job1.outputs.secondword }}

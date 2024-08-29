@@ -1,18 +1,26 @@
-# .github/workflows/reusable-workflow.yml
-name: Reusable Workflow
+name: Reusable workflow
 
 on:
   workflow_call:
-    # outputs:
-    #   example_output:
-    #     description: 'An example output'
+    # Map the workflow outputs to job outputs
+    outputs:
+      firstword:
+        description: "The first output string"
+        value: ${{ jobs.example_job.outputs.output1 }}
+      secondword:
+        description: "The second output string"
+        value: ${{ jobs.example_job.outputs.output2 }}
 
 jobs:
-  example-job:
+  example_job:
+    name: Generate output
     runs-on: ubuntu-latest
-    steps:
-      - name: Set output value
-        id: set-output
-        run: echo "::set-output name=example_output::Hello, World!"
+    # Map the job outputs to step outputs
     outputs:
-      example_output: ${{ steps.set-output.outputs.example_output }}
+      output1: ${{ steps.step1.outputs.firstword }}
+      output2: ${{ steps.step2.outputs.secondword }}
+    steps:
+      - id: step1
+        run: echo "firstword=hello" >> $GITHUB_OUTPUT
+      - id: step2
+        run: echo "secondword=world" >> $GITHUB_OUTPUT
