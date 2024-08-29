@@ -9,6 +9,14 @@ on:
       codedeploy_rollback:
         description: "Trigger rollback in dependent workflow if value if True"
         required: false
+  workflow_call:
+    inputs:
+      commit_hash:
+        description: "This commit_hash we will use to rollback the codedeploy"
+        required: false
+      codedeploy_rollback:
+        description: "Trigger rollback in dependent workflow if value if True"
+        required: false
   # push:
   #   branches:
   #     - multi_tenant_stage

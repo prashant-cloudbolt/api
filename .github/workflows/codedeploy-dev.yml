@@ -2,6 +2,7 @@ name: api-dev-codedeploy
 
 on:
   workflow_dispatch:
+  workflow_call:
   # push:
   #   branches:
   #     - multi_tenant_dev
