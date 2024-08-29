@@ -3,9 +3,9 @@ name: Reusable Workflow
 
 on:
   workflow_call:
-    outputs:
-      example_output:
-        description: 'An example output'
+    # outputs:
+    #   example_output:
+    #     description: 'An example output'
 
 jobs:
   example-job:
