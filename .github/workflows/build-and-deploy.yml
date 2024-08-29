@@ -33,10 +33,9 @@ jobs:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
     outputs:
-      status: ${{ job.status }}
+      status: ${{ steps.check_status.outcome }}
 
-  codedeploy:
-    name: Trigger codedeploy with latest commit to Stage
+  status:
     needs: [qa-automation]
     runs-on: ubuntu-latest
 
@@ -46,5 +45,5 @@ jobs:
 
       - name: Echo Branch name
         run: |
-          status="${{ needs.qa-automation.result }}"
+          status="${{ needs.qa-automation.outputs.status }}"
           echo "QA Automation status is : $status"
