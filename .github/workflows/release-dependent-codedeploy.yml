@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
         name: Checkout Repository
 
-      - name: Print codedeploy_rollback env
+      - name: Print inputs
         run: |
           echo "Codedeploy rollback  is : ${{ inputs.codedeploy_rollback }}"
           echo "Environment is : ${{ inputs.environment }}"
