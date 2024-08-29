@@ -16,4 +16,4 @@ jobs:
     needs: call-reusable-workflow
     steps:
       - name: Use output from reusable workflow
-        run: echo "Output from reusable workflow: ${{ needs.call-reusable-workflow.outputs.example_output }}"
+        run: echo "Output from reusable workflow ${{ needs.call-reusable-workflow.outputs.example_output }}"
