@@ -69,7 +69,7 @@ jobs:
         id: check_status
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        continue-on-error: true  # Continue even if the command fails, so output is set correctly
+        # continue-on-error: true  # Continue even if the command fails, so output is set correctly
         run: |
           status=""
           while [ "$status" != "completed" ]; do
