@@ -32,18 +32,18 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
-    # outputs:
-    #   status: ${{ steps.check_status.outcome }}
+    outputs:
+      status: ${{ steps.check_status.outputs.status }}
 
-  # status:
-  #   needs: [qa-automation]
-  #   runs-on: ubuntu-latest
+  status:
+    needs: [qa-automation]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       name: Checkout Repository
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
 
-  #     - name: Echo Branch name
-  #       run: |
-  #         status="${{ needs.qa-automation.outputs.status }}"
-  #         echo "QA Automation status is : $status"
+      - name: Echo Branch name
+        run: |
+          status="${{ needs.qa-automation.outputs.status }}"
+          echo "QA Automation status is : $status"
