@@ -7,7 +7,7 @@ on:
       codedeploy_rollback:
         description: "Trigger rollback in dependent workflow if value if True"
         required: false
-        type: string
+        default: 'False'
 
 permissions:
   id-token: write 
@@ -26,6 +26,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: Checkout Repository
+
+      - name: Print inputs
+        run: |
+          echo "Codedeploy rollback  is : ${{ inputs.codedeploy_rollback }}"
 
       - name: Get Commit Hash from Tag
         if: ${{ github.event.inputs.codedeploy_rollback == 'True' }}
