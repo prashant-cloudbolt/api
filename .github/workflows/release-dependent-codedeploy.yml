@@ -7,13 +7,6 @@ on:
         description: 'Trigger rollback in dependent workflow if value if True'
         required: true
         default: 'False'
-  # workflow_run:
-  #   workflows: ["api-mirastage-codedeploy", "api-dev-codedeploy", "api-stage-codedeploy"]
-  #   branches:
-  #     - multi_tenant_dev
-  #     - multi_tenant_stage
-  #   types:
-  #     - completed
 
 jobs:
   trigger-codedeploy-stage:

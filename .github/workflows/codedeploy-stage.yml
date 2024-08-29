@@ -9,7 +9,7 @@ on:
       codedeploy_rollback:
         description: "This commit_hash we will use to rollback the codedeploy"
         required: true
-        default: 'false'
+        default: 'False'
   push:
     branches:
       - multi_tenant_stage
@@ -96,7 +96,7 @@ jobs:
           run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
           echo "run_id=$run_id" >> $GITHUB_ENV
 
-      - name: Echo Run_ID
+      - name: Run_ID of release-dependent-codedeploy.yml
         run: echo "Run ID= ${{ env.run_id }}"
 
       - name: Watch workflow run of release-dependent-codedeploy.yml
