@@ -18,9 +18,9 @@ jobs:
   codedeploy_dev:
     name: Trigger codedeploy to Dev Ohio
     if: github.ref == 'refs/heads/multi_tenant_dev'
-    uses: .github/workflows/codedeploy-dev.yml
+    uses: ./.github/workflows/codedeploy-dev.yml
 
   codedeploy_stage:
     name: Trigger codedeploy to Dev Ohio
     if: github.ref == 'refs/heads/multi_tenant_stage'
-    uses: .github/workflows/codedeploy-stage.yml
+    uses: ./.github/workflows/codedeploy-stage.yml
