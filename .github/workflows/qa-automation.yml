@@ -18,6 +18,8 @@ permissions:
 jobs:
   qa-tests:
     runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.check_status.outputs.status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,9 +85,9 @@ jobs:
             sleep 15  # Increased sleep to reduce API calls
           done
 
-      - name: print status
+      - name: Debug Status Output
         run: |
-          echo ${{ steps.check_status.outputs.status }}
+          echo "Set status to: ${{ steps.check_status.outputs.status }}"
 
       - name: Notify failure to Slack
         uses: act10ns/slack@v2.0.0

@@ -41,7 +41,6 @@ jobs:
       - uses: actions/checkout@v4
         name: Checkout Repository
 
-      - name: Echo Branch name
+      - name: QA Automation status
         run: |
-          status=${{ needs.qa-automation.outputs.status }}
-          echo "QA Automation status is: $status"
+          echo "QA Automation status is: ${{ needs.qa-automation.outputs.status }}"
