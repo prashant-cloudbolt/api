@@ -16,7 +16,6 @@ permissions:
 
 jobs:
   codedeploy:
-    name: Trigger codedeploy with latest commit to Dev Ohio
     runs-on: ubuntu-latest
 
     environment:

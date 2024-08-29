@@ -8,11 +8,6 @@ on:
         description: "Trigger rollback in dependent workflow if value if True"
         required: false
         type: string
-    # secrets:
-    #   GH_TOKEN:
-    #     required: true
-    #   SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK:
-    #     required: true
 
 permissions:
   id-token: write 
@@ -23,7 +18,6 @@ permissions:
 
 jobs:
   codedeploy:
-    name: Trigger codedeploy with latest commit to Stage
     runs-on: ubuntu-latest
 
     environment:
@@ -98,56 +92,74 @@ jobs:
 
       - name: Print inputs
         run: |
-          echo "Git Hash is : ${{ inputs.commit_hash }}"
           echo "Codedeploy rollback  is : ${{ inputs.codedeploy_rollback }}"
 
-      - name: Trigger release-dependent-codedeploy.yml
+      - name: Run release-dependent-codedeploy.yml workflow
+        uses: codex-/return-dispatch@v1
+        id: return_dispatch
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: multi_tenant_stage
+          repo: api
+          owner: prashant-cloudbolt
+          workflow: codedeploy-stage.yml
+          workflow_inputs: '{ "codedeploy_rollback": "${{ inputs.codedeploy_rollback }}",  "environment": "CSMP_Stage" }'
+
+      - name: Watch release-dependent-codedeploy.yml workflow
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh workflow run release-dependent-codedeploy.yml \
-            --repo prashant-cloudbolt/api \
-            --field codedeploy_rollback=${{ inputs.codedeploy_rollback }} \
-            --field environment="CSMP_Stage"
+          RUN_ID=${{ steps.return_dispatch.outputs.run_id }}
+          gh run watch $RUN_ID --repo prashant-cloudbolt/api
 
-      - name: Get Workflow Run ID of release-dependent-codedeploy.yml workflow
-        id: get_run_id
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          max_attempts=5  # Maximum number of attempts to retrieve the workflow run ID
-          attempt=0
-          workflow_list=""
+      # - name: Trigger release-dependent-codedeploy.yml
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     gh workflow run release-dependent-codedeploy.yml \
+      #       --repo prashant-cloudbolt/api \
+      #       --field codedeploy_rollback=${{ inputs.codedeploy_rollback }} \
+      #       --field environment="CSMP_Stage"
 
-          while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
-            echo "Attempt $(($attempt+1)) to retrieve workflow run ID"
-            workflow_list=$(gh run list --repo prashant-cloudbolt/api --workflow=release-dependent-codedeploy.yml --limit=1 --json databaseId)
+      # - name: Get Workflow Run ID of release-dependent-codedeploy.yml workflow
+      #   id: get_run_id
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     max_attempts=5  # Maximum number of attempts to retrieve the workflow run ID
+      #     attempt=0
+      #     workflow_list=""
+
+      #     while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
+      #       echo "Attempt $(($attempt+1)) to retrieve workflow run ID"
+      #       workflow_list=$(gh run list --repo prashant-cloudbolt/api --workflow=release-dependent-codedeploy.yml --limit=1 --json databaseId)
             
-            if [ -z "$workflow_list" ]; then
-              echo "Workflow run ID not yet available. Retrying..."
-              attempt=$(($attempt + 1))
-              sleep 10  # Wait for a short time before retrying
-            else
-              echo "Workflow run ID retrieved successfully."
-            fi
-          done
+      #       if [ -z "$workflow_list" ]; then
+      #         echo "Workflow run ID not yet available. Retrying..."
+      #         attempt=$(($attempt + 1))
+      #         sleep 10  # Wait for a short time before retrying
+      #       else
+      #         echo "Workflow run ID retrieved successfully."
+      #       fi
+      #     done
 
-          if [ -z "$workflow_list" ]; then
-            echo "Failed to retrieve workflow run ID after $max_attempts attempts"
-            exit 1
-          fi
+      #     if [ -z "$workflow_list" ]; then
+      #       echo "Failed to retrieve workflow run ID after $max_attempts attempts"
+      #       exit 1
+      #     fi
 
-          run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
-          echo "run_id=$run_id" >> $GITHUB_ENV
+      #     run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
+      #     echo "run_id=$run_id" >> $GITHUB_ENV
 
-      - name: Run_ID of release-dependent-codedeploy.yml
-        run: echo "Run ID= ${{ env.run_id }}"
+      # - name: Run_ID of release-dependent-codedeploy.yml
+      #   run: echo "Run ID= ${{ env.run_id }}"
 
-      - name: Watch workflow run of release-dependent-codedeploy.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          gh run watch ${{ env.run_id }} --repo prashant-cloudbolt/api
+      # - name: Watch workflow run of release-dependent-codedeploy.yml
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     gh run watch ${{ env.run_id }} --repo prashant-cloudbolt/api
 
       - name: Notify failure to Slack
         uses: act10ns/slack@v2.0.0
