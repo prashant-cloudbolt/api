@@ -10,6 +10,8 @@ on:
         description: "Environment to deploy"
         required: true
         type: string
+      distinct_id:
+        description: "This input required to run the workflow from return-dispatch"  
 
 jobs:
   trigger-codedeploy-stage:
@@ -59,6 +61,9 @@ jobs:
             :rotating_light: *Urgent*: Release Dependent CodeDeploy Workflow Failed for API of CSMP-Stage Environment:rotating_light:
             Repository: ${{ github.repository }}
             Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
+        run: echo ${{ github.event.inputs.distinct_id }}
 
   trigger-codedeploy-dev:
     if: ${{ github.event.inputs.environment == 'CSMP_Dev' }}
