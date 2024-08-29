@@ -64,7 +64,8 @@ jobs:
         run: |
           gh workflow run release-dependent-codedeploy.yml \
           --repo prashant-cloudbolt/api \
-          --field codedeploy_rollback=${{ env.codedeploy_rollback }}
+          --field codedeploy_rollback=${{ env.codedeploy_rollback }} \
+          --field environment="CSMP_Stage"
 
       - name: Get Workflow Run ID of release-dependent-codedeploy.yml workflow
         id: get_run_id
