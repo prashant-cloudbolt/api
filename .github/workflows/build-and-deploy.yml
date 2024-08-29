@@ -44,4 +44,4 @@ jobs:
       - name: Echo Branch name
         run: |
           status="${{ needs.qa-automation.outputs.status }}"
-          echo "QA Automation status is : $status"
+          echo "QA Automation status is: $status"

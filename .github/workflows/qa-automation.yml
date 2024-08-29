@@ -8,13 +8,6 @@ on:
       SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK:
         required: true
 
-  # workflow_run:
-  #   workflows: ["release-dependent-codedeploy"]
-  #   branches:
-  #     - multi_tenant_stage
-  #   types:
-  #     - completed
-
 permissions:
   id-token: write 
   contents: read
@@ -81,10 +74,10 @@ jobs:
               echo "Final conclusion: $conclusion"
               if [ "$conclusion" != "success" ]; then
                 echo "Target workflow failed. Failing source workflow."
-                echo "status=failure" >> $GITHUB_OUTPUT # Set output as failure
+                echo "status=failure" >> $GITHUB_OUTPUT
                 exit 1
               else
-                echo "status=success" >> $GITHUB_OUTPUT # Set output as success
+                echo "status=success" >> $GITHUB_OUTPUT
               fi
             fi
             sleep 15  # Increased sleep to reduce API calls
