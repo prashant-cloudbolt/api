@@ -38,7 +38,7 @@ jobs:
           repo: ${{ matrix.repository }}
           owner: prashant-cloudbolt
           workflow: codedeploy-stage.yml
-          workflow_inputs: '{ "codedeploy_rollback": "${{ inputs.codedeploy_rollback }}", "environment": "${{ inputs.environment }}" }'
+          workflow_inputs: '{ "codedeploy_rollback": "${{ inputs.codedeploy_rollback }}" }'
 
       - name: Watch ${{ matrix.repository }} release version workflow
         continue-on-error: true
