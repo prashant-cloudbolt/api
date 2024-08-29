@@ -32,8 +32,6 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
-    outputs:
-      status: ${{ steps.check_status.outputs.status }}
 
   status:
     needs: [qa-automation]
@@ -45,5 +43,5 @@ jobs:
 
       - name: Echo Branch name
         run: |
-          status="${{ needs.qa-automation.outputs.status }}"
+          status="${{ needs.qa-automation.outputs.job_status }}"
           echo "QA Automation status is : $status"
