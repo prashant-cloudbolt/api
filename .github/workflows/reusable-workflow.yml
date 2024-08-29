@@ -5,7 +5,7 @@ on:
   workflow_call:
     outputs:
       example_output:
-        type: string
+        description: 'An example output'
 
 jobs:
   example-job:
