@@ -23,6 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: Checkout Repository
+
+      - name: Set env codedeploy_rollback
+        run: echo "codedeploy_rollback=${{ inputs.codedeploy_rollback }}" >> $GITHUB_ENV
+
+      - name: Print codedeploy_rollback env
+        run: echo "Rollback env is ${{ inputs.codedeploy_rollback }}"
       
       - name: Run ${{ matrix.repository }} release version workflow
         uses: codex-/return-dispatch@v1
@@ -33,6 +39,7 @@ jobs:
           repo: ${{ matrix.repository }}
           owner: prashant-cloudbolt
           workflow: codedeploy-stage.yml
+          workflow_inputs: '{ "codedeploy_rollback": ${{ env.codedeploy_rollback }} }'
 
       - name: Watch ${{ matrix.repository }} release version workflow
         continue-on-error: true

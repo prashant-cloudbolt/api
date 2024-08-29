@@ -52,7 +52,7 @@ jobs:
     needs: api_codedeploy
     runs-on: ubuntu-latest
     steps:
-      - name: Capture codedeploy_rollback
+      - name: Set env codedeploy_rollback
         run: echo "codedeploy_rollback=${{ inputs.codedeploy_rollback }}" >> $GITHUB_ENV
 
       - name: Use codedeploy_rollback input
