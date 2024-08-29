@@ -13,7 +13,6 @@ permissions:
   security-events: write
   actions: read
 
-
 jobs:
   codedeploy_dev:
     if: github.ref == 'refs/heads/multi_tenant_dev'
@@ -22,3 +21,5 @@ jobs:
   codedeploy_stage:
     if: github.ref == 'refs/heads/multi_tenant_stage'
     uses: ./.github/workflows/codedeploy-stage.yml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}

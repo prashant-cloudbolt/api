@@ -19,6 +19,10 @@ on:
         description: "Trigger rollback in dependent workflow if value if True"
         required: false
         type: string
+    secrets:
+      GH_TOKEN:
+        required: true
+
   # push:
   #   branches:
   #     - multi_tenant_stage
