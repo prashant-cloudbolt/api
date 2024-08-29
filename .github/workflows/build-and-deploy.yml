@@ -29,6 +29,7 @@ jobs:
     if: github.ref == 'refs/heads/multi_tenant_stage'
     needs: [codedeploy_stage]
     uses: ./.github/workflows/qa-automation.yml
+    id: qa-automation
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
@@ -43,4 +44,4 @@ jobs:
 
       - name: QA Automation status
         run: |
-          echo "QA Automation status is: ${{ needs.qa-automation }}"
+          echo "QA Automation status is: ${{ needs.qa-automation.outputs.job_status }}"

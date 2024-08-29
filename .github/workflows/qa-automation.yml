@@ -19,7 +19,7 @@ jobs:
   qa-tests:
     runs-on: ubuntu-latest
     outputs:
-      status: ${{ steps.check_status.outputs.status }}
+      job_status: ${{ steps.check_status.outputs.status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
