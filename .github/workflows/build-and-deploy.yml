@@ -1,0 +1,46 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - multi_tenant_dev
+      - multi_tenant_stage
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  codedeploy_dev:
+    if: github.ref == 'refs/heads/multi_tenant_dev'
+    uses: ./.github/workflows/codedeploy-dev.yml
+
+  codedeploy_stage:
+    if: github.ref == 'refs/heads/multi_tenant_stage'
+    uses: ./.github/workflows/codedeploy-stage.yml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+
+  qa-automation:
+    if: github.ref == 'refs/heads/multi_tenant_stage'
+    needs: [codedeploy_stage]
+    uses: ./.github/workflows/qa-automation.yml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+
+  status:
+    needs: [qa-automation]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+
+      - name: QA Automation status
+        run: |
+          echo "QA Automation status is: ${{ needs.qa-automation.outputs.job_status }}"
