@@ -43,4 +43,4 @@ jobs:
 
       - name: QA Automation status
         run: |
-          echo "QA Automation status is: ${{ needs.qa-automation.outputs.status }}"
+          echo "QA Automation status is: ${{ needs.qa-automation }}"
