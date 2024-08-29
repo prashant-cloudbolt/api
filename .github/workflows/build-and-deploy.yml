@@ -35,7 +35,7 @@ jobs:
     if: ${{ needs.qa-automation.outputs.job_status == 'failure' && github.ref == 'refs/heads/multi_tenant_stage' }}
     uses: ./.github/workflows/codedeploy-stage.yml
     with:
-      codedeploy_rollback: "True"
+      codedeploy_rollback: True
     secrets: inherit
 
   # status:
