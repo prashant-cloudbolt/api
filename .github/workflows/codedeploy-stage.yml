@@ -5,9 +5,9 @@ on:
   workflow_call:
     inputs:
       codedeploy_rollback:
-        description: "Trigger rollback in dependent workflow if value if True"
+        description: "Trigger rollback in dependent workflow if value is True"
         required: false
-        default: 'False'
+        type: string
 
 permissions:
   id-token: write 
@@ -29,7 +29,7 @@ jobs:
 
       - name: Print inputs
         run: |
-          echo "Codedeploy rollback  is : ${{ inputs.codedeploy_rollback }}"
+          echo "Codedeploy rollback  is : ${{ github.event.inputs.codedeploy_rollback }}"
 
       - name: Get Commit Hash from Tag
         if: ${{ github.event.inputs.codedeploy_rollback == 'True' }}
