@@ -1,7 +1,6 @@
 name: api-stage-codedeploy
 
 on:
-  workflow_dispatch:  
   workflow_call:
     inputs:
       codedeploy_rollback:
@@ -29,10 +28,10 @@ jobs:
 
       - name: Print inputs
         run: |
-          echo "Codedeploy rollback  is : ${{ github.event.inputs.codedeploy_rollback }}"
+          echo "Codedeploy rollback  is : ${{ inputs.codedeploy_rollback }}"
 
       - name: Get Commit Hash from Tag
-        if: ${{ github.event.inputs.codedeploy_rollback == 'True' }}
+        if: ${{ inputs.codedeploy_rollback == 'True' }}
         id: commit_hash
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -65,7 +64,7 @@ jobs:
           echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
       - name: Display Results of Release, Tag, Hash
-        if: ${{ github.event.inputs.codedeploy_rollback == 'True' }}
+        if: ${{ inputs.codedeploy_rollback == 'True' }}
         run: |
           echo "Branch Suffix: ${{ env.branch_suffix }}"
           echo "Current Release: ${{ env.latest_release }}"
