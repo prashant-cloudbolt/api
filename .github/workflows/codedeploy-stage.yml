@@ -102,7 +102,7 @@ jobs:
           ref: multi_tenant_stage
           repo: api
           owner: prashant-cloudbolt
-          workflow: codedeploy-stage.yml
+          workflow: release-dependent-codedeploy.yml
           workflow_inputs: '{ "codedeploy_rollback": "${{ inputs.codedeploy_rollback }}",  "environment": "CSMP_Stage" }'
 
       - name: Watch release-dependent-codedeploy.yml workflow
