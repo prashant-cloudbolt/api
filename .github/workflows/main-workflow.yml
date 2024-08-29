@@ -10,7 +10,6 @@ on:
 jobs:
   call-reusable-workflow:
     uses: ./.github/workflows/reusable-workflow.yml
-    id: reusable
 
   use-output:
     runs-on: ubuntu-latest
