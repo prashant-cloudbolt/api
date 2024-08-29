@@ -1,0 +1,18 @@
+# .github/workflows/reusable-workflow.yml
+name: Reusable Workflow
+
+on:
+  workflow_call:
+    outputs:
+      example_output:
+        type: string
+
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+    outputs:
+      example_output: ${{ steps.set-output.outputs.example_value }}
+    steps:
+      - name: Set output value
+        id: set-output
+        run: echo "::set-output name=example_value::Hello, World!"
