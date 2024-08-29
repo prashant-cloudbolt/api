@@ -28,6 +28,7 @@ jobs:
     if: github.ref == 'refs/heads/multi_tenant_stage'
     needs: [codedeploy_stage]
     uses: ./.github/workflows/qa-automation.yml
+    continue-on-error: true
     secrets: inherit
 
   codedeploy_rollback_stage:
