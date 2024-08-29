@@ -23,3 +23,12 @@ jobs:
     uses: ./.github/workflows/codedeploy-stage.yml
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+
+  qa-automation:
+    if: github.ref == 'refs/heads/multi_tenant_stage'
+    needs: [codedeploy_stage]
+    uses: ./.github/workflows/qa-automation.yml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
