@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/release-version.yml
     with:
       environment: CSMP_Dev
-      environment: multi_tenant_dev
+      branch: multi_tenant_dev
     secrets: inherit
 
   codedeploy_stage:
@@ -53,5 +53,5 @@ jobs:
     uses: ./.github/workflows/release-version.yml
     with:
       environment: CSMP_Stage
-      environment: multi_tenant_stage
+      branch: multi_tenant_stage
     secrets: inherit
