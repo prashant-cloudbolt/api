@@ -106,3 +106,6 @@ jobs:
             :rotating_light: *Urgent*: Release Dependent CodeDeploy Workflow Failed for API of CSMP-DEV Environment :rotating_light:
             Repository: ${{ github.repository }}
             Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
+        run: echo ${{ github.event.inputs.distinct_id }}
