@@ -23,6 +23,8 @@ jobs:
     needs: [codedeploy_dev]
     if: github.ref == 'refs/heads/multi_tenant_dev'
     uses: ./.github/workflows/release-version.yml
+    with:
+      environment: CSMP_Dev
     secrets: inherit
 
   codedeploy_stage:
@@ -48,4 +50,6 @@ jobs:
     needs: [codedeploy_stage, qa-automation]
     if: ${{ needs.qa-automation.outputs.job_status == 'success' && github.ref == 'refs/heads/multi_tenant_stage' }}
     uses: ./.github/workflows/release-version.yml
+    with:
+      environment: CSMP_Stage
     secrets: inherit
