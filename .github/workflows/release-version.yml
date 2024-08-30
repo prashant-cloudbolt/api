@@ -175,18 +175,6 @@ jobs:
           workflow: release-dependent-version.yml
           workflow_inputs: '{ "environment": "${{ inputs.environment }}", "branch": "${{ inputs.branch }}" }'
 
-      # - name: Run release-dependent-version.yml workflow for ${{ inputs.environment }}
-      #   if: ${{ inputs.environment == 'CSMP_Dev' }}
-      #   uses: codex-/return-dispatch@v1
-      #   id: return_dispatch
-      #   with:
-      #     token: ${{ secrets.GH_TOKEN }}
-      #     ref: multi_tenant_dev
-      #     repo: api
-      #     owner: prashant-cloudbolt
-      #     workflow: release-dependent-version.yml
-      #     workflow_inputs: '{ "environment": "${{ inputs.environment }}" }'
-
       - name: Watch release-dependent-version.yml workflow
         continue-on-error: true
         env:

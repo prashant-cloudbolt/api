@@ -30,7 +30,6 @@ jobs:
           gh workflow run maven.yml --repo prashant-cloudbolt/qa-automation
 
       - name: Get Workflow Run ID of maven.yml workflow
-        id: get_run_id
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
@@ -39,12 +38,12 @@ jobs:
           workflow_list=""
 
           while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
-            echo "Attempt $(($attempt+1)) to retrieve workflow run ID"
-            workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --branch=multi_tenant_stage --limit=1 --json databaseId)
+            echo "Attempt $((attempt + 1)) to retrieve workflow run ID"
+            workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=maven.yml --limit=1 --json databaseId)
             
             if [ -z "$workflow_list" ]; then
               echo "Workflow run ID not yet available. Retrying..."
-              attempt=$(($attempt + 1))
+              attempt=$((attempt + 1))
               sleep 10  # Wait for a short time before retrying
             else
               echo "Workflow run ID retrieved successfully."
@@ -58,7 +57,6 @@ jobs:
 
           run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
           echo "run_id=$run_id" >> $GITHUB_ENV
-
 
       - name: Check Target Workflow Status of maven.yml
         id: check_status

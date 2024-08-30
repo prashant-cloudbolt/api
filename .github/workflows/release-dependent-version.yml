@@ -27,7 +27,6 @@ jobs:
         name: Checkout Repository
 
       - name: Run ${{ matrix.repository }} release version workflow of ${{ inputs.environment }}
-        # if: ${{ inputs.environment == 'CSMP_Stage' }}
         uses: codex-/return-dispatch@v1
         id: return_dispatch
         with:
@@ -36,17 +35,6 @@ jobs:
           repo: ${{ matrix.repository }}
           owner: prashant-cloudbolt
           workflow: release-version.yml
-
-      # - name: Run ${{ matrix.repository }} release version workflow of ${{ inputs.environment }}
-      #   if: ${{ inputs.environment == 'CSMP_Dev' }}
-      #   uses: codex-/return-dispatch@v1
-      #   id: return_dispatch
-      #   with:
-      #     token: ${{ secrets.GH_TOKEN }}
-      #     ref: multi_tenant_dev
-      #     repo: ${{ matrix.repository }}
-      #     owner: prashant-cloudbolt
-      #     workflow: release-version.yml
 
       - name: Watch ${{ matrix.repository }} release version workflow
         continue-on-error: true
