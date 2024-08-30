@@ -7,6 +7,10 @@ on:
         description: "Environment to deploy"
         required: true
         type: string
+      branch:
+        description: "Github branch name to deploy"
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -165,11 +169,11 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.GH_TOKEN }}
-          ref: multi_tenant_stage
+          ref: ${{ inputs.branch }}
           repo: api
           owner: prashant-cloudbolt
           workflow: release-dependent-version.yml
-          workflow_inputs: '{ "environment": "${{ inputs.environment }}" }'
+          workflow_inputs: '{ "environment": "${{ inputs.environment }}", "branch": "${{ inputs.branch }}" }'
 
       # - name: Run release-dependent-version.yml workflow for ${{ inputs.environment }}
       #   if: ${{ inputs.environment == 'CSMP_Dev' }}
