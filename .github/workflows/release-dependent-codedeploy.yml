@@ -82,7 +82,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.GH_TOKEN }}
-          ref: "multi_tenant_dev"
+          ref: multi_tenant_dev
           repo: ${{ matrix.repository }}
           owner: prashant-cloudbolt
           workflow: codedeploy-dev.yml
