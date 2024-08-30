@@ -29,20 +29,41 @@ jobs:
           echo $branch_name
           echo "ENV name is : ${{ vars.ENV }}"
 
-  # release_api_dev:
-  #   if: github.ref == 'refs/heads/multi_tenant_dev'
-  #   needs: codedeploy
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         ref: multi_tenant_dev
+  release-dependent-codedeploy:
+    name: "Release Dependent Codedeploy"
+    needs: codedeploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
 
-  #     - name: Run codedeploy-dev workflow
-  #       env:
-  #         GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
-  #       run: |
-  #         gh workflow run release-version.yml \
-  #         --ref=multi_tenant_dev \
-  #         --repo prashant-cloudbolt/api
+      - name: Run release-dependent-codedeploy.yml workflow
+        uses: codex-/return-dispatch@v1
+        id: return_dispatch
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: multi_tenant_dev
+          repo: api
+          owner: prashant-cloudbolt
+          workflow: release-dependent-codedeploy.yml
+          workflow_inputs: '{ "environment": "CSMP_Dev" }'
+
+      - name: Watch release-dependent-codedeploy.yml workflow
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          RUN_ID=${{ steps.return_dispatch.outputs.run_id }}
+          gh run watch $RUN_ID --repo prashant-cloudbolt/api
+
+      - name: Notify failure to Slack
+        uses: act10ns/slack@v2.0.0
+        if: ${{ failure() }} # This ensures the step runs only if the previous steps fail
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }} 
+        with:
+          status: ${{ job.status }}
+          message: |
+            :rotating_light: *Urgent*: Release Dependent CodeDeploy Workflow Failed for API of CSMP-DEV Environment:rotating_light:
+            Repository: ${{ github.repository }}
+            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

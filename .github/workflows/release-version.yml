@@ -147,7 +147,6 @@ jobs:
             Repository: ${{ github.repository }}
             Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-
   release-dependent-version:
     name: "Release Dependent Version"
     needs: generate-tag
