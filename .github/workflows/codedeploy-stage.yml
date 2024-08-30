@@ -28,6 +28,9 @@ jobs:
 
       - name: Print inputs
         run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo "branch name is : $branch_name"
+          echo "ENV name is : ${{ vars.ENV }}"
           echo "Codedeploy rollback  is : ${{ inputs.codedeploy_rollback }}"
 
       - name: Get Commit Hash from Tag
