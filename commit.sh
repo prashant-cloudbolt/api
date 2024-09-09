@@ -14,4 +14,4 @@ git add .
 
 # Commit the changes with the provided message
 git commit -m "$commit_message"
-git push origin CP-929
+git push origin CP-929-1
