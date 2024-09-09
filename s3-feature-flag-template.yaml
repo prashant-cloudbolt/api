@@ -22,7 +22,7 @@ Resources:
   S3BucketWithVersioning:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Sub "github-feature-flag-json-s3-${Environment}"
+      BucketName: !Sub "github-feature-flag-json-s3-${Environment}-12345"
       VersioningConfiguration:
         Status: Enabled
 
