@@ -7,11 +7,9 @@ on:
       - multi_tenant_stage
 
 permissions:
-  id-token: write 
+  id-token: write
   contents: read
-  pull-requests: write
-  security-events: write
-  actions: read
+  deployments: write
 
 jobs:
   s3-feature-flag:
