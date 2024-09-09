@@ -1,5 +1,6 @@
 {
-    "_comment": "This JSON structure contains feature flag configurations for specific tenants. Each key represents a unique tenant ID.",
+    
+    "_comment": "This JSON structure contains feature flag configurations for specific tenants. Each key represents a unique tenant ID..",
     "example-tenant-id": {
         "title": "Feature Flags for Tenant ID: example-tenant-id",
         "tenant_id": "example-tenant-id",
