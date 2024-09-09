@@ -1,23 +1,23 @@
 name: Create S3 bucket for feature flag Template
 
 on: 
-    workflow_call:
-      inputs:
-        environment:
-          description: 'The environment to deploy the stack to.'
-          default: ''
-          required: false
-          type: string
-        stack-name:
-          description: 'Name of the CloudFormation stack.'
-          default: ''
-          required: false
-          type: string
-        working-directory:
-          description: 'The working directory to run the action in.'
-          default: ''
-          required: false
-          type: string
+  workflow_call:
+    inputs:
+      environment:
+        description: 'The environment to deploy the stack to.'
+        default: ''
+        required: false
+        type: string
+      stack-name:
+        description: 'Name of the CloudFormation stack.'
+        default: ''
+        required: false
+        type: string
+      working-directory:
+        description: 'The working directory to run the action in.'
+        default: ''
+        required: false
+        type: string
 
 permissions:
   id-token: write
@@ -35,36 +35,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
-        aws-region: us-east-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
+          aws-region: us-east-1
 
-      - name: Convert environment to lowercase
-        id: lowercase-env
-        run: |
-          echo "environment=$(echo '${{ inputs.environment }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        - name: Convert environment to lowercase
+          id: lowercase-env
+          run: |
+            echo "environment=$(echo '${{ inputs.environment }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Check if S3 bucket exists
-        id: check-bucket
-        run: |
-            BUCKET_NAME="github-feature-flag-json-s3-${{ env.environment }}-12345"
-            echo "Checking for bucket: $BUCKET_NAME"
-            if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
-                echo "bucket_exists=true" >> $GITHUB_OUTPUT
-            else
-                echo "bucket_exists=false" >> $GITHUB_OUTPUT
-            fi
+        - name: Check if S3 bucket exists
+          id: check-bucket
+          run: |
+              BUCKET_NAME="github-feature-flag-json-s3-${{ env.environment }}-12345"
+              echo "Checking for bucket: $BUCKET_NAME"
+              if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+                  echo "bucket_exists=true" >> $GITHUB_OUTPUT
+              else
+                  echo "bucket_exists=false" >> $GITHUB_OUTPUT
+              fi
 
-      - name: Deploy S3 bucket for feature flag Template
-        if: steps.check-bucket.outputs.bucket_exists == 'false'
-        working-directory: ${{ inputs.working-directory }}
-        run: |
-            aws cloudformation deploy \
-                --template-file s3-feature-flag-template.yaml \
-                --stack-name ${{ inputs.stack-name }}-s3-feature-flag \
-                --parameter-overrides \
-                    Environment=${{ env.environment }} \
-                --capabilities CAPABILITY_NAMED_IAM
+        - name: Deploy S3 bucket for feature flag Template
+          if: steps.check-bucket.outputs.bucket_exists == 'false'
+          working-directory: ${{ inputs.working-directory }}
+          run: |
+              aws cloudformation deploy \
+                  --template-file s3-feature-flag-template.yaml \
+                  --stack-name ${{ inputs.stack-name }}-s3-feature-flag \
+                  --parameter-overrides \
+                      Environment=${{ env.environment }} \
+                  --capabilities CAPABILITY_NAMED_IAM
