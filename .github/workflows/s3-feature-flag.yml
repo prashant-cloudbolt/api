@@ -113,6 +113,7 @@ jobs:
           echo "next_version=$NEXT_VERSION" >> $GITHUB_ENV
 
       - name: Upload new feature_flag.json to S3 with versioning
+        if: env.featureflag_modified == 'true'
         run: |
           BUCKET_NAME="github-feature-flag-json-s3-${{ env.environment }}-12345"
           NEXT_VERSION_FILE="feature_flag_${{ env.next_version }}.json"
