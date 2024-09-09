@@ -1,0 +1,23 @@
+{
+    "_comment": "This JSON structure contains feature flag configurations for specific tenants. Each key represents a unique tenant ID.",
+    "example-tenant-id": {
+        "title": "Feature Flags for Tenant ID: example-tenant-id",
+        "tenant_id": "example-tenant-id",
+        "feature_flags": {
+            "sankey_chart_report_enabled": false,
+            "multi_policy_enabled": false,
+            "signal_configuration_enabled": false,
+            "provider_credentials_enabled": false
+        }
+    },
+    "1269a385-05ff-4b7c-b8f5-9d3bd8326f2b": {
+        "title": "Feature Flags for Tenant ID: 1269a385-05ff-4b7c-b8f5-9d3bd8326f2b",
+        "tenant_id": "1269a385-05ff-4b7c-b8f5-9d3bd8326f2b",
+        "feature_flags": {
+            "sankey_chart_report_enabled": true,
+            "multi_policy_enabled": true,
+            "signal_configuration_enabled": true,
+            "provider_credentials_enabled": true
+        }
+    }
+}
