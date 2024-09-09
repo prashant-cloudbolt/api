@@ -68,3 +68,16 @@ jobs:
                 --parameter-overrides \
                     Environment=${{ env.environment }} \
                 --capabilities CAPABILITY_NAMED_IAM
+
+      - name: Check if feature_flag.json has been modified
+        id: feature_flag
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q "feature_flag.json"; then
+            echo "file_modified=true" >> $GITHUB_ENV
+          else
+            echo "file_modified=false" >> $GITHUB_ENV
+          fi
+
+      - name: Output result
+        run: |
+          echo "Feature flag modified: ${{ env.file_modified }}"
