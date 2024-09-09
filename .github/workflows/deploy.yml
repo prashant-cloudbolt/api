@@ -1,0 +1,24 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - multi_tenant_dev
+      - multi_tenant_stage
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  s3-feature-flag:
+    name: S3 Feature Flag Json File
+    uses: ./.github/workflows/s3-feature-flag.yml
+    secrets: inherit
+    with:
+        environment: "Development"
+        stack-name: "test-stack"
+        working-directory: "."
