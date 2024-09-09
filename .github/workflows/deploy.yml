@@ -1,10 +1,12 @@
-name: Build and Deploy
+name: Deploy Dev Environment
 
 on:
-  push:
-    branches:
-      - multi_tenant_dev
-      - multi_tenant_stage
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
 
 permissions:
   id-token: write
@@ -15,6 +17,7 @@ jobs:
   s3-feature-flag:
     name: S3 Feature Flag Json File
     uses: ./.github/workflows/s3-feature-flag.yml
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     secrets: inherit
     with:
         environment: "Development"
