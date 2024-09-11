@@ -44,8 +44,9 @@ runs:
 
     - name: Check if S3 bucket exists
       id: check-bucket
+      shell: bash
       run: |
-        BUCKET_NAME=${{ env.s3_bucket }}
+        BUCKET_NAME=${{ inputs.feature-flag-s3-bucket }}
         echo "Checking for bucket: $BUCKET_NAME"
         if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
           echo "bucket_exists=true" >> $GITHUB_OUTPUT
@@ -56,29 +57,33 @@ runs:
     - name: Deploy S3 bucket for feature flag Template
       if: steps.check-bucket.outputs.bucket_exists == 'false'
       working-directory: ${{ inputs.working-directory }}
+      shell: bash
       run: |
         aws cloudformation deploy \
           --template-file s3-feature-flag-template.yaml \
           --stack-name ${{ inputs.stack-name }} \
           --parameter-overrides \
-            Environment=${{ env.environment }} \
-            S3Bucket=${{ env.s3_bucket }}
+            Environment=${{ inputs.environment }} \
+            S3Bucket=${{ inputs.feature-flag-s3-bucket }}
 
     - name: Check if feature_flag.json has been modified
       id: check-modified
+      shell: bash
       run: |
         git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
-        if git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD | grep -q ${{ env.file_name }}; then
+        if git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD | grep -q ${{ inputs.feature-flag-file-name }}; then
           echo "featureflag_modified=true" >> $GITHUB_ENV
         else
           echo "featureflag_modified=false" >> $GITHUB_ENV
         fi
 
     - name: Output feature flag modified
+      shell: bash
       run: |
         echo "Feature flag modified: ${{ env.featureflag_modified }}"
 
     - name: Upload new feature_flag.json to S3 with versioning
+      shell: bash
       if: env.featureflag_modified == 'true'
       run: |
-        aws s3 cp services/feature_flag/${{ env.file_name }} s3://${{ env.s3_bucket }}/${{ env.file_name }}
+        aws s3 cp services/feature_flag/${{ inputs.feature-flag-file-name }} s3://${{ inputs.feature-flag-s3-bucket }}/${{ inputs.feature-flag-file-name }}
