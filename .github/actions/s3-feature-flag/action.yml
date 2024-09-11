@@ -27,9 +27,9 @@ inputs:
     required: false
     type: string
 
-defaults:
-  run:
-    shell: bash -leo pipefail {0}
+# defaults:
+#   run:
+#     shell: bash -leo pipefail {0}
 
 env:
   environment: ${{ inputs.environment }}
