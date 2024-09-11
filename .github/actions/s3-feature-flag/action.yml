@@ -17,12 +17,12 @@ inputs:
     description: 'The working directory to run the action in.'
     required: true
     default: '.'
-  aws-access-key-id:
-    description: 'AWS Access Key ID'
-    required: true
-  aws-secret-access-key:
-    description: 'AWS Secret Access Key'
-    required: true
+  # aws-access-key-id:
+  #   description: 'AWS Access Key ID'
+  #   required: true
+  # aws-secret-access-key:
+  #   description: 'AWS Secret Access Key'
+  #   required: true
 
 runs:
   using: 'composite'
@@ -35,16 +35,9 @@ runs:
     # - name: Configure AWS Credentials
     #   uses: aws-actions/configure-aws-credentials@v4
     #   with:
-    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-    #     aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
+    #     aws-access-key-id: ${{ inputs.aws-access-key-id }}
+    #     aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
     #     aws-region: us-east-1
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ inputs.aws-access-key-id }}
-        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
-        aws-region: us-east-1
 
     - name: Check if S3 bucket exists
       id: check-bucket

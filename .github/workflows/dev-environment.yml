@@ -22,6 +22,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+
       - name: Create S3 bucket and upload feature flag
         uses: ./.github/actions/s3-feature-flag
         with:
@@ -31,7 +38,7 @@ jobs:
           stack-name: "mira-feature-flag-json-development-cf-stack"
           working-directory: "."
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          ws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
 
 
   # s3-feature-flag:
