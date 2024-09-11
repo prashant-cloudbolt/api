@@ -1,0 +1,45 @@
+name: Deploy Dev Environment
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+permissions:
+  id-token: write
+  contents: read
+  deployments: write
+
+jobs:
+  deploy-dev:
+    name: Deploy to Mira Development Environment
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create s3 bucket of ${{ vars.FEATURE_FLAG_S3_BUCKET }} and upload ${{ vars.FEATURE_FLAG_FILE_NAME }}
+        uses: ./.github/actions/s3-feature-flag
+        with:
+          environment: "development"
+          feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
+          feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
+          stack-name: "mira-feature-flag-json-development-cf-stack"
+          working-directory: "."
+
+
+  # s3-feature-flag:
+  #   name: S3 Feature Flag Json File
+  #   uses: ./.github/workflows/s3-feature-flag.yml
+  #   if: github.event_name == 'pull_request' && github.event.action != 'closed'
+  #   secrets: inherit
+  #   with:
+  #     environment: "development"
+  #     feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
+  #     feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
+  #     stack-name: "mira-feature-flag-json-development-cf-stack"
+  #     working-directory: "."
