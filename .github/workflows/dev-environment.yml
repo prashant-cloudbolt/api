@@ -30,6 +30,8 @@ jobs:
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           stack-name: "mira-feature-flag-json-development-cf-stack"
           working-directory: "."
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          ws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
 
 
   # s3-feature-flag:
