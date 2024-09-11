@@ -11,12 +11,12 @@ on:
       feature-flag-s3-bucket:
         description: 'S3 bucket name for storing feature_flag.json file'
         default: ''
-        required: false
+        required: true
         type: string
       feature-flag-file-name:
         description: 'File name of feature flag'
         default: ''
-        required: false
+        required: true
         type: string
       stack-name:
         description: 'Name of the CloudFormation stack.'
