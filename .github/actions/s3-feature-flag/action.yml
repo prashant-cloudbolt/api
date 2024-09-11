@@ -1,26 +1,22 @@
-name: Upload feature_flag.json to S3 with versioning
-
+name: 'Upload feature_flag.json to S3'
+description: 'Creates an S3 bucket (if needed) and uploads the feature_flag.json file with versioning.'
 inputs:
   environment:
     description: 'The environment to deploy the stack to.'
-    required: false
-    default: ''
+    required: true
   feature-flag-s3-bucket:
-    description: 'S3 bucket name for storing feature_flag.json file'
-    required: false
-    default: ''
+    description: 'The S3 bucket where the feature flag will be stored.'
+    required: true
   feature-flag-file-name:
-    description: 'File name of feature flag'
-    required: false
-    default: ''
+    description: 'The name of the feature flag file to upload.'
+    required: true
   stack-name:
-    description: 'Name of the CloudFormation stack.'
-    required: false
-    default: ''
+    description: 'The name of the CloudFormation stack.'
+    required: true
   working-directory:
     description: 'The working directory to run the action in.'
-    required: false
-    default: ''
+    required: true
+    default: '.'
 
 runs:
   using: 'composite'
