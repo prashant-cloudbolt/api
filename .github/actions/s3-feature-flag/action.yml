@@ -22,11 +22,6 @@ inputs:
     required: false
     default: ''
 
-env:
-  environment: ${{ inputs.environment }}
-  s3_bucket: ${{ inputs.feature-flag-s3-bucket }}
-  file_name: ${{ inputs.feature-flag-file-name }}
-
 runs:
   using: 'composite'
   steps:
