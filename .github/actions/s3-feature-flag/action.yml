@@ -3,33 +3,24 @@ name: Upload feature_flag.json to S3 with versioning
 inputs:
   environment:
     description: 'The environment to deploy the stack to.'
-    default: ''
     required: false
-    type: string
+    default: ''
   feature-flag-s3-bucket:
     description: 'S3 bucket name for storing feature_flag.json file'
+    required: false
     default: ''
-    required: true
-    type: string
   feature-flag-file-name:
     description: 'File name of feature flag'
+    required: false
     default: ''
-    required: true
-    type: string
   stack-name:
     description: 'Name of the CloudFormation stack.'
-    default: ''
     required: false
-    type: string
+    default: ''
   working-directory:
     description: 'The working directory to run the action in.'
-    default: ''
     required: false
-    type: string
-
-# defaults:
-#   run:
-#     shell: bash -leo pipefail {0}
+    default: ''
 
 env:
   environment: ${{ inputs.environment }}
@@ -37,7 +28,7 @@ env:
   file_name: ${{ inputs.feature-flag-file-name }}
 
 runs:
-  using: composite
+  using: 'composite'
   steps:
     - name: Checkout
       uses: actions/checkout@v4
