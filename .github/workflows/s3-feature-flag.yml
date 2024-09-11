@@ -8,6 +8,16 @@ on:
         default: ''
         required: false
         type: string
+      feature-flag-s3-bucket:
+        description: 'S3 bucket name for storing feature_flag.json file'
+        default: ''
+        required: false
+        type: string
+      feature-flag-file-name:
+        description: ''File name of feature flag"
+        default: ''
+        required: false
+        type: string
       stack-name:
         description: 'Name of the CloudFormation stack.'
         default: ''
@@ -28,6 +38,11 @@ defaults:
   run:
     shell: bash -leo pipefail {0}
 
+env:
+  environment: ${{ inputs.environment }}
+  s3_bucket: ${{ inputs.feature-flag-s3-bucket }}
+  file_name: ${{ inputs.feature-flag-file-name }}
+
 jobs:
   s3-feature-flag:
     runs-on: ubuntu-latest
@@ -44,81 +59,43 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
           aws-region: us-east-1
 
-      - name: Convert environment to lowercase
-        id: lowercase-env
-        run: |
-          echo "environment=$(echo '${{ inputs.environment }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
       - name: Check if S3 bucket exists
         id: check-bucket
         run: |
-            BUCKET_NAME="github-feature-flag-json-s3-${{ env.environment }}-12345"
-            echo "Checking for bucket: $BUCKET_NAME"
-            if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
-                echo "bucket_exists=true" >> $GITHUB_OUTPUT
-            else
-                echo "bucket_exists=false" >> $GITHUB_OUTPUT
-            fi
+          BUCKET_NAME=${{ env.s3_bucket }}
+          echo "Checking for bucket: $BUCKET_NAME"
+          if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "bucket_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "bucket_exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Deploy S3 bucket for feature flag Template
         if: steps.check-bucket.outputs.bucket_exists == 'false'
         working-directory: ${{ inputs.working-directory }}
         run: |
-            aws cloudformation deploy \
-                --template-file s3-feature-flag-template.yaml \
-                --stack-name ${{ inputs.stack-name }}-s3-feature-flag \
-                --parameter-overrides \
-                    Environment=${{ env.environment }} \
-                --capabilities CAPABILITY_NAMED_IAM
+          aws cloudformation deploy \
+            --template-file s3-feature-flag-template.yaml \
+            --stack-name ${{ inputs.stack-name }} \
+            --parameter-overrides \
+              Environment=${{ env.environment }} \
+              S3Bucket=${{ env.s3_bucket }}
 
       - name: Check if feature_flag.json has been modified
         id: check-modified
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
-          if git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD | grep -q "feature_flag.json"; then
+          if git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD | grep -q ${{ env.file_name }}; then
             echo "featureflag_modified=true" >> $GITHUB_ENV
           else
             echo "featureflag_modified=false" >> $GITHUB_ENV
           fi
 
-      - name: Output result
+      - name: Output feature flag modified
         run: |
           echo "Feature flag modified: ${{ env.featureflag_modified }}"
-
-      - name: Fetch the latest version of feature_flag.json from S3
-        if: env.featureflag_modified == 'true'
-        id: get-latest-version
-        run: |
-          BUCKET_NAME="github-feature-flag-json-s3-${{ env.environment }}-12345"
-          
-          # List all versions in the bucket and sort by version number
-          LATEST_VERSION=$(aws s3 ls s3://$BUCKET_NAME/ | grep feature_flag_v | sort | tail -n 1 | awk '{print $4}')
-          echo "Latest version of feature_flag.json: $LATEST_VERSION"
-          echo "latest_version=$LATEST_VERSION" >> $GITHUB_ENV
-
-      - name: Determine next version
-        if: env.featureflag_modified == 'true'
-        id: version-increment
-        run: |
-          # Get the current version number (v0.0.1, v0.0.2, etc.)
-          CURRENT_VERSION=$(echo "${{ env.latest_version }}" | grep -o 'v[0-9]*\.[0-9]*\.[0-9]*')
-          if [ -z "$CURRENT_VERSION" ]; then
-            # If no version exists, start with v0.0.1
-            NEXT_VERSION="v0.0.1"
-          else
-            # Increment the patch number by 1 (v0.0.1 -> v0.0.2)
-            NEXT_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{print $1 "." $2 "." $3+1}')
-          fi
-          echo "Next version: $NEXT_VERSION"
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_ENV
 
       - name: Upload new feature_flag.json to S3 with versioning
         if: env.featureflag_modified == 'true'
         run: |
-          BUCKET_NAME="github-feature-flag-json-s3-${{ env.environment }}-12345"
-          NEXT_VERSION_FILE="feature_flag_${{ env.next_version }}.json"
-          
-          # Copy the feature_flag.json file to S3 with the new version
-          aws s3 cp services/feature_flag/feature_flag.json s3://$BUCKET_NAME/$NEXT_VERSION_FILE
-          
-          echo "Uploaded feature_flag.json as $NEXT_VERSION_FILE"
+          aws s3 cp services/feature_flag/${{ env.file_name }} s3://${{ env.s3_bucket }}/${{ env.file_name }}
