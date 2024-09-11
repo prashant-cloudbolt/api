@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create s3 bucket of ${{ vars.FEATURE_FLAG_S3_BUCKET }} and upload ${{ vars.FEATURE_FLAG_FILE_NAME }}
+      - name: Create S3 bucket and upload feature flag
         uses: ./.github/actions/s3-feature-flag
         with:
           environment: "development"
