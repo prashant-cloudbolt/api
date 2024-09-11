@@ -13,10 +13,6 @@ permissions:
   contents: read
   deployments: write
 
-env:
-  feature_flag_s3_bucket: mira-feature-flag-json-s3-development-12345
-  feature_flag_file_name: feature_flag.json
-
 jobs:
   s3-feature-flag:
     name: S3 Feature Flag Json File
@@ -25,7 +21,7 @@ jobs:
     secrets: inherit
     with:
       environment: "development"
-      feature-flag-s3-bucket: ${{ env.feature_flag_s3_bucket }}
-      feature-flag-file-name: ${{ env.feature_flag_file_name }}
+      feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
+      feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
       stack-name: "mira-feature-flag-json-development-cf-stack"
       working-directory: "."
