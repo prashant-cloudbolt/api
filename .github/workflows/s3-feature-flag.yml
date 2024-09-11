@@ -14,7 +14,7 @@ on:
         required: false
         type: string
       feature-flag-file-name:
-        description: ''File name of feature flag"
+        description: 'File name of feature flag'
         default: ''
         required: false
         type: string
