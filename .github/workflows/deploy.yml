@@ -13,7 +13,7 @@ permissions:
 jobs:
   deploy-testing:
     name: Deploy to Mira Testing Environment
-    if: github.ref_name == 'develop'
+    if: github.ref_name == 'multi_tenant_stage'
     runs-on: ubuntu-latest
 
     environment:
@@ -34,7 +34,7 @@ jobs:
         continue-on-error: true
         uses: ./.github/actions/s3-feature-flag
         with:
-          environment: "development"
+          environment: "testing"
           feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           working-directory: "."
