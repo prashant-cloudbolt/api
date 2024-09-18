@@ -38,3 +38,14 @@ jobs:
           feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           working-directory: "."
+
+  trigger-deployment-to-staging:
+    name: Trigger Deployment to Mira Staging
+    if: github.ref_name == 'multi_tenant_stage'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deployment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run deploy.yml --repo prashant-cloudbolt/node-api --field "environment=Staging"
