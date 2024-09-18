@@ -35,6 +35,6 @@ runs:
     - name: Upload feature flag to S3 if modified
       shell: bash
       run: |
-        echo "Working Directory is: {{ inputs.working-directory }}"
-        ls -la {{ inputs.working-directory }}/scripts
-        bash {{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh "${{ inputs.feature-flag-s3-bucket }}" "${{ inputs.feature-flag-file-name }}" "{{ inputs.working-directory }}"
+        echo "Working Directory is: ${{ inputs.working-directory }}"
+        ls -la ${{ inputs.working-directory }}/scripts
+        bash ${{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh "${{ inputs.feature-flag-s3-bucket }}" "${{ inputs.feature-flag-file-name }}" "${{ inputs.working-directory }}"
