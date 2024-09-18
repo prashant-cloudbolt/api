@@ -1,12 +1,9 @@
-name: Deploy Dev Environment
+name: Deploy
 
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - closed
+  push:
+    branches:
+      - "multi_tenant_stage"
 
 permissions:
   id-token: write
@@ -14,10 +11,14 @@ permissions:
   deployments: write
 
 jobs:
-  deploy-dev:
-    name: Deploy to Mira Development Environment
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+  deploy-testing:
+    name: Deploy to Mira Testing Environment
+    if: github.ref_name == 'develop'
     runs-on: ubuntu-latest
+
+    environment:
+      name: Testing
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
