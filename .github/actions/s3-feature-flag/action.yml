@@ -40,5 +40,5 @@ runs:
     - name: Upload feature flag to S3 if modified
       shell: bash
       run: |
-        WORKING_DIR=${{ inputs.working-directory }}
-        $WORKING_DIR/scripts/verify_feature_flag_change.sh "${{ inputs.feature-flag-s3-bucket }}" "${{ inputs.feature-flag-file-name }}"
+        export WORKING_DIR=${{ inputs.working-directory }}
+        bash $WORKING_DIR/scripts/verify_feature_flag_change.sh "${{ inputs.feature-flag-s3-bucket }}" "${{ inputs.feature-flag-file-name }}"
