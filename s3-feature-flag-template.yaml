@@ -9,6 +9,11 @@ Parameters:
     Type: String
     Default: dev
     MaxLength: "60"  # Prevents the 64 for char limit for OriginAccessControlConfig.Name
+  S3Bucket:
+    Description: S3 bucket name for storing feature_flag.json file
+    Type: String
+    Default: dev
+    MaxLength: "60"
 
 Conditions:
   IsTestingStagingProduction: !Or [
@@ -22,7 +27,7 @@ Resources:
   S3BucketWithVersioning:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Sub "github-feature-flag-json-s3-${Environment}-12345"
+      BucketName: !Ref S3Bucket
       VersioningConfiguration:
         Status: Enabled
 

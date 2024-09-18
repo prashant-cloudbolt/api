@@ -1,0 +1,43 @@
+name: 'Upload feature_flag.json to S3'
+description: 'Creates an S3 bucket (if needed) and uploads the feature_flag.json file with versioning.'
+inputs:
+  environment:
+    description: 'The environment to deploy the stack to.'
+    required: true
+  feature-flag-s3-bucket:
+    description: 'The S3 bucket where the feature flag will be stored.'
+    required: true
+  feature-flag-file-name:
+    description: 'The name of the feature flag file to upload.'
+    required: true
+  working-directory:
+    description: 'The working directory to run the action in.'
+    required: true
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2 # Fetch the last 2 commits for comparison
+
+    - name: Check if S3 bucket exists
+      id: check-bucket
+      shell: bash
+      run: |
+        BUCKET_NAME=${{ inputs.feature-flag-s3-bucket }}
+        echo "Checking for bucket: $BUCKET_NAME"
+        if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+          echo "bucket_exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "bucket_exists=false"
+          aws s3api create-bucket --bucket ${{ inputs.feature-flag-s3-bucket }}
+          aws s3api put-bucket-versioning --bucket ${{ inputs.feature-flag-s3-bucket }} --versioning-configuration Status=Enabled
+        fi
+
+    - name: Upload feature flag to S3 if modified
+      shell: bash
+      run: |
+        ./scripts/verify_feature_flag_change.sh "${{ inputs.feature-flag-s3-bucket }}" "${{ inputs.feature-flag-file-name }}"
