@@ -4,6 +4,10 @@ inputs:
   environment:
     description: 'The environment to deploy the stack to.'
     required: true
+  region:
+    description: 'The AWS region to deploy the stack to.'
+    required: true
+    default: 'us-west-2'
   feature-flag-s3-bucket:
     description: 'The S3 bucket where the feature flag will be stored.'
     required: true
@@ -28,13 +32,32 @@ runs:
           echo "bucket_exists=true" >> $GITHUB_OUTPUT
         else
           echo "bucket_exists=false"
-          aws s3api create-bucket --bucket ${{ inputs.feature-flag-s3-bucket }}
+          aws s3api create-bucket --bucket ${{ inputs.feature-flag-s3-bucket }} --region ${{ inputs.region }} --create-bucket-configuration LocationConstraint=${{ inputs.region }}
           aws s3api put-bucket-versioning --bucket ${{ inputs.feature-flag-s3-bucket }} --versioning-configuration Status=Enabled
         fi
+
+    - name: Set the feature flag path
+      shell: bash
+      run: |
+        WORKING_DIR=${{ inputs.working-directory }}
+        ENVIRONMENT=${{ inputs.environment }}
+
+        if [[ "$ENVIRONMENT" == "development" || "$ENVIRONMENT" == "testing" || "$ENVIRONMENT" == "Staging" ]]; then
+          FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/staging"
+        elif [[ "$ENVIRONMENT" == "Production" ]]; then
+          FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/production"
+        else
+          echo "Given $ENVIRONMENT is not support" 
+        fi
+
+        echo "Feature flag path set to: $FEATURE_FLAG_PATH"
+        echo "feature_flag_path=$FEATURE_FLAG_PATH" >> $GITHUB_ENV
+        
 
     - name: Upload feature flag to S3 if modified
       shell: bash
       run: |
-        echo "Working Directory is: ${{ inputs.working-directory }}"
-        ls -la ${{ inputs.working-directory }}
-        bash ${{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh "${{ inputs.feature-flag-s3-bucket }}" "${{ inputs.feature-flag-file-name }}" "${{ inputs.working-directory }}"
+        bash ${{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh \
+          "${{ inputs.feature-flag-s3-bucket }}" \
+          "${{ inputs.feature-flag-file-name }}" \
+          "${{ env.feature_flag_path }}"
