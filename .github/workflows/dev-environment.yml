@@ -49,6 +49,7 @@ jobs:
               DBInstanceIdentifier=postgres-instance \
               DBUsername=admin \
               DBPassword=securepassword123 \
+              DBName=development \
               VPCId=vpc-0cd8a0084b79bf7f8 \
               AllocatedStorage=20 \
               PubliclyAccessible=true \
