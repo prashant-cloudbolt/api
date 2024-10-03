@@ -26,6 +26,16 @@ Parameters:
     MinValue: 20
     MaxValue: 1000
 
+  DBUsername:
+    Description: "Username for the PostgreSQL RDS instance"
+    Type: String
+    Default: postgres
+
+  DBPassword:
+    Description: "Password for the PostgreSQL RDS instance"
+    Type: String
+    NoEcho: true  # Hides the password in the console output
+
   DBName:
     Description: "Name of the initial database to create"
     Type: String
