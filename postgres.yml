@@ -118,14 +118,10 @@ Resources:
       Value: !Ref DBPassword
       Tier: Standard
       Description: Password for the RDS instance
-      KeyId: alias/aws/ssm # Uses default KMS key
 
   # Create a PostgreSQL RDS instance with SSM Parameters
   MiraRDSInstance:
     Type: AWS::RDS::DBInstance
-    DependsOn: 
-      - MiraDBUsernameParameter
-      - MiraDBPasswordParameter
     Properties: 
       DBInstanceIdentifier: !Ref DBInstanceIdentifier
       DBInstanceClass: !Ref DBInstanceClass
