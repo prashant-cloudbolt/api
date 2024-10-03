@@ -121,8 +121,8 @@ Resources:
       DBInstanceClass: !Ref DBInstanceClass
       Engine: !Ref Engine
       AllocatedStorage: !Ref AllocatedStorage
-      MasterUsername: !Ref MiraDBUsernameParameter
-      MasterUserPassword: !Ref MiraDBPasswordParameter
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
       DBName: !Ref DBName
       BackupRetentionPeriod: !Ref BackupRetentionPeriod
       VPCSecurityGroups:

@@ -30,7 +30,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Create S3 bucket and upload feature flag
-        continue-on-error: true
+        continue-on-error: true  # Allows the workflow to proceed even if this step fails
         uses: ./.github/actions/s3-feature-flag
         with:
           environment: "development"
@@ -39,7 +39,7 @@ jobs:
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           working-directory: "."
 
-      - name: Deploy CloudFormation Stack of postgreSQL RDS Instance
+      - name: Deploy CloudFormation Stack of PostgreSQL RDS Instance
         run: |
           aws cloudformation deploy \
             --stack-name mira-development-postgressql-instance \
@@ -47,8 +47,8 @@ jobs:
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
               DBInstanceIdentifier=postgres-instance \
-              DBUsername=admin \
-              DBPassword=securepassword123 \
+              DBUsername=${{ secrets.MIRA_POSTGRES_USERNAME }} \
+              DBPassword=${{ secrets.MIRA_POSTGRES_PASSWORD }} \
               DBName=development \
               VPCId=vpc-0cd8a0084b79bf7f8 \
               AllocatedStorage=20 \
