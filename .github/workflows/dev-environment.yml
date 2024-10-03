@@ -39,7 +39,7 @@ jobs:
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           working-directory: "."
 
-      - name: Deploy CloudFormation Stack of PostgreSQL RDS Instance
+      - name: Deploy CloudFormation Stack of postgreSQL RDS Instance
         run: |
           aws cloudformation deploy \
             --stack-name mira-development-postgressql-instance \
@@ -47,8 +47,8 @@ jobs:
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
               DBInstanceIdentifier=postgres-instance \
-              DBUsername=${{ secrets.MIRA_POSTGRES_USERNAME }} \
-              DBPassword=${{ secrets.MIRA_POSTGRES_PASSWORD }} \
+              DBUsername="${{ secrets.MIRA_POSTGRES_USERNAME }}" \
+              DBPassword="${{ secrets.MIRA_POSTGRES_PASSWORD }}" \
               DBName=development \
               VPCId=vpc-0cd8a0084b79bf7f8 \
               AllocatedStorage=20 \
