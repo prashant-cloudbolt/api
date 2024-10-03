@@ -114,7 +114,7 @@ Resources:
     Type: AWS::SSM::Parameter
     Properties:
       Name: !Sub "/rds/${DBInstanceIdentifier}/password"
-      Type: SecureString
+      Type: String
       Value: !Ref DBPassword
       Tier: Standard
       Description: Password for the RDS instance
@@ -136,7 +136,7 @@ Resources:
       PubliclyAccessible: !Ref PubliclyAccessible
       MultiAZ: !Ref MultiAZ
       StorageType: !Ref StorageType
-      DeletionPolicy: Snapshot
+    DeletionPolicy: Snapshot
 
 Outputs:
   # Output the endpoint of the RDS instance
