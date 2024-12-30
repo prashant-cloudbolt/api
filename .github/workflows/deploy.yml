@@ -1,0 +1,40 @@
+name: Deploy Latest Release
+
+on:
+  push:
+    branches:
+      - "develop"
+
+permissions:
+  id-token: write
+  contents: read
+  deployments: write
+
+jobs:
+  s3-feature-flag:
+    name: S3 Feature Flag (Testing)
+    runs-on: ubuntu-latest
+
+    environment:
+      name: Testing
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Create S3 bucket and upload feature flag
+        continue-on-error: true
+        uses: ./.github/actions/s3-feature-flag
+        with:
+          environment: "Testing"
+          region: ${{ vars.AWS_REGION }}
+          feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
+          feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
+          working-directory: "."
