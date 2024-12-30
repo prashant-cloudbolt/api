@@ -33,7 +33,7 @@ jobs:
         continue-on-error: true
         uses: ./.github/actions/s3-feature-flag
         with:
-          environment: "development"
+          environment: "Development"
           region: ${{ vars.AWS_REGION }}
           feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
