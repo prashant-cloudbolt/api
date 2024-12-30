@@ -32,7 +32,6 @@ jobs:
       - name: Check if feature_flag.json is modified
         id: check-modifications
         run: |
-          git fetch origin main
           MODIFIED_FILES=$(git diff --name-only)
           if echo "$MODIFIED_FILES" | grep -q "^services/feature_flag/.*feature_flag.json$"; then
             echo "feature_flag_modified=true" >> $GITHUB_ENV
