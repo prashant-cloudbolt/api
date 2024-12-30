@@ -42,7 +42,7 @@ runs:
         WORKING_DIR=${{ inputs.working-directory }}
         ENVIRONMENT=${{ inputs.environment }}
 
-        if [[ "$ENVIRONMENT" == "Development" || "$ENVIRONMENT" == "Testing" || "$ENVIRONMENT" == "Staging" ]]; then
+        if [[ "$ENVIRONMENT" =~ ^(Development|Testing|Staging)$ ]]; then
           FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/staging"
         elif [[ "$ENVIRONMENT" == "Production" ]]; then
           FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/production"

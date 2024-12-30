@@ -29,12 +29,31 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Create S3 bucket and upload feature flag
-        continue-on-error: true
-        uses: ./.github/actions/s3-feature-flag
-        with:
-          environment: "Development"
-          region: ${{ vars.AWS_REGION }}
-          feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
-          feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
-          working-directory: "."
+      - name: Check if feature_flag.json is modified
+        id: check-modifications
+        run: |
+          git fetch origin main
+          MODIFIED_FILES=$(git diff --name-only)
+          if echo "$MODIFIED_FILES" | grep -q "^services/feature_flag/.*feature_flag.json$"; then
+            echo "feature_flag_modified=true" >> $GITHUB_ENV
+          else
+            echo "feature_flag_modified=false" >> $GITHUB_ENV
+          fi
+
+      - name: Debug modified files
+        if: env.feature_flag_modified == 'true'
+        run: echo "feature_flag.json is modified in this pull request."
+
+      - name: Skip upload
+        if: env.feature_flag_modified == 'false'
+        run: echo "feature_flag.json not modified. Skipping upload."
+
+      # - name: Create S3 bucket and upload feature flag
+      #   # continue-on-error: true
+      #   uses: ./.github/actions/s3-feature-flag
+      #   with:
+      #     environment: "Development"
+      #     region: ${{ vars.AWS_REGION }}
+      #     feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
+      #     feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
+      #     working-directory: "."
