@@ -31,31 +31,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Detect branches
-        run: |
-          echo "Source Branch: ${{ github.event.pull_request.head.ref }}"
-          echo "Target Branch: ${{ github.event.pull_request.base.ref }}"
-        
       - name: Get modified files
         run: |
           git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > modified_files.txt
           echo "Modified files:"
           cat modified_files.txt
-        
-      - name: Check if file.json is modified
+
+      - name: Check if services/feature_flag/staging/feature_flag.json is modified
         run: |
-          if grep -q "file.json" modified_files.txt; then
-            echo "file.json has been modified.";
-            echo "file.json=true" >> $GITHUB_ENV
+          if grep -q "services/feature_flag/staging/feature_flag.json" modified_files.txt; then
+            echo "services/feature_flag/staging/feature_flag.json has been modified."
+            echo "file_modified=true" >> $GITHUB_ENV
           else
-            echo "file.json has NOT been modified.";
-            echo "file.json=false" >> $GITHUB_ENV
+            echo "services/feature_flag/staging/feature_flag.json has NOT been modified."
+            echo "file_modified=false" >> $GITHUB_ENV
           fi
 
-      - name: Conditional step based on file.json modification
-        if: env.file_json == 'true'
+      - name: Conditional step based on file modification
+        if: env.file_modified == 'true'
         run: |
-          echo "Taking action because file.json is modified."
+          echo "Performing actions because services/feature_flag/staging/feature_flag.json is modified."
 
       # - name: Create S3 bucket and upload feature flag
       #   # continue-on-error: true
