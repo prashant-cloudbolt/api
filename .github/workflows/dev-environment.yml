@@ -45,17 +45,13 @@ jobs:
             echo "file_modified=false" >> $GITHUB_ENV
           fi
 
-      - name: Conditional step based on file modification
+      - name: Create S3 bucket and upload feature flag
+        # continue-on-error: true
         if: env.file_modified == 'true'
-        run: |
-          echo "Performing actions because services/feature_flag/staging/feature_flag.json is modified."
-
-      # - name: Create S3 bucket and upload feature flag
-      #   # continue-on-error: true
-      #   uses: ./.github/actions/s3-feature-flag
-      #   with:
-      #     environment: "Development"
-      #     region: ${{ vars.AWS_REGION }}
-      #     feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
-      #     feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
-      #     working-directory: "."
+        uses: ./.github/actions/s3-feature-flag
+        with:
+          environment: "Development"
+          region: ${{ vars.AWS_REGION }}
+          feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
+          feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
+          working-directory: "."
