@@ -1,9 +1,9 @@
-name: Deploy
+name: Deploy Latest Release
 
 on:
   push:
     branches:
-      - "multi_tenant_stage"
+      - "develop"
 
 permissions:
   id-token: write
@@ -11,9 +11,8 @@ permissions:
   deployments: write
 
 jobs:
-  deploy-testing:
-    name: Deploy to Mira Testing Environment
-    if: github.ref_name == 'multi_tenant_stage'
+  s3-feature-flag:
+    name: S3 Feature Flag (Testing)
     runs-on: ubuntu-latest
 
     environment:
@@ -28,24 +27,14 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Create S3 bucket and upload feature flag
         continue-on-error: true
         uses: ./.github/actions/s3-feature-flag
         with:
-          environment: "testing"
+          environment: "Testing"
+          region: ${{ vars.AWS_REGION }}
           feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           working-directory: "."
-
-  trigger-deployment-to-staging:
-    name: Trigger Deployment to Mira Staging
-    if: github.ref_name == 'multi_tenant_stage'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Deployment
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          gh workflow run deploy.yml --repo prashant-cloudbolt/node-api --field "environment=Staging"

@@ -42,17 +42,16 @@ runs:
         WORKING_DIR=${{ inputs.working-directory }}
         ENVIRONMENT=${{ inputs.environment }}
 
-        if [[ "$ENVIRONMENT" == "development" || "$ENVIRONMENT" == "testing" || "$ENVIRONMENT" == "Staging" ]]; then
+        if [[ "$ENVIRONMENT" =~ ^(Development|Testing|Staging)$ ]]; then
           FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/staging"
         elif [[ "$ENVIRONMENT" == "Production" ]]; then
           FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/production"
         else
-          echo "Given $ENVIRONMENT is not support" 
+          echo "Given $ENVIRONMENT is not support for feature_flag" 
         fi
 
         echo "Feature flag path set to: $FEATURE_FLAG_PATH"
         echo "feature_flag_path=$FEATURE_FLAG_PATH" >> $GITHUB_ENV
-        
 
     - name: Upload feature flag to S3 if modified
       shell: bash

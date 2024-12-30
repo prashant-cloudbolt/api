@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -29,11 +31,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: Get modified files and check for file.json
+        run: |
+          # Get the list of modified files
+          modified_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          
+          # Directly check if the specific file is in the modified files list
+          if echo "$modified_files" | grep -q "services/feature_flag/staging/feature_flag.json"; then
+            echo "services/feature_flag/staging/feature_flag.json has been modified."
+            echo "file_modified=true" >> $GITHUB_ENV
+          else
+            echo "services/feature_flag/staging/feature_flag.json has NOT been modified."
+            echo "file_modified=false" >> $GITHUB_ENV
+          fi
+
       - name: Create S3 bucket and upload feature flag
-        continue-on-error: true
+        # continue-on-error: true
+        if: env.file_modified == 'true'
         uses: ./.github/actions/s3-feature-flag
         with:
-          environment: "development"
+          environment: "Development"
           region: ${{ vars.AWS_REGION }}
           feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
