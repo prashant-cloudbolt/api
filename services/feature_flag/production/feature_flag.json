@@ -11,8 +11,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
-        }
+            "policy_if_block_enabled": true        }
     },
     "global-cloudbolt-tenant": {
         "title": "Global Feature Flags",
@@ -25,7 +24,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     },
     "e6614d0b-3e3c-4b89-9182-39e40c0c28ae": {
@@ -39,7 +38,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     },
     "b99eecca-c01f-4d51-800a-2ef3c3ec2dbf": {
@@ -53,7 +52,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     },
     "019774bc-2895-40b9-8c14-b64b2205d387": {
@@ -67,7 +66,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     },
     "55c41dc8-107e-4a66-86a6-d972e625d1aa": {
@@ -81,7 +80,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     },
     "98f4637c-3b5e-4f1e-97c0-24b6775e590a": {
@@ -95,7 +94,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     }
 }

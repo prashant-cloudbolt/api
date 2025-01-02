@@ -1,0 +1,63 @@
+name: Delete Stack
+run-name: Delete Stack @ ${{ inputs.stackName || github.ref_name }}
+
+on:
+  pull_request:
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      stackName:
+        description: Name of the stack to delete.
+        type: string
+        required: true
+
+# This allows a subsequently queued workflow run to interrupt previous runs
+concurrency:
+  # Will have inputs.stackName in workflow_dispatch cases, head_ref when triggered by a pull_request
+  # It'd be ideal to have share a concurrency group with the deploy workflow, but we can't be sure this
+  # workflow will be triggered after the deploy workflow. So instead we'll create a cancel workflow job.
+  group: "Delete @ ${{ inputs.stackName || github.head_ref }}"
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
+
+env:
+  # Will have head_ref in PR branches with a base, and ref_name in a base/main branch (like develop)
+  TARGET_REF: "${{ github.head_ref }}"
+  GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  delete-stack:
+    name: Delete Stack
+    
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Get Stack Name
+        id: get-stack-name
+        uses: ./.github/actions/get-stack-name
+        with:
+          ref: ${{ env.TARGET_REF }}
+
+      - name: Delete feature flag s3 bucket
+        uses: ./.github/actions/delete-feature-flag-bucket/
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          bucket-name: steps.get-stack-name.outputs.feature-flag-s3-bucket-slugified
