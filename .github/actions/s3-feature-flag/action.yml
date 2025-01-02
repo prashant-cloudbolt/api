@@ -57,11 +57,11 @@ runs:
       id: get-version
       shell: bash
       run: |
-        S3_FILE_VERSION_ID=$(bash ${{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh \
+        bash ${{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh \
           "${{ inputs.feature-flag-s3-bucket }}" \
           "${{ inputs.feature-flag-file-name }}" \
-          "${{ env.feature_flag_path }}")
+          "${{ env.feature_flag_path }}"
 
-        echo "S3 Feature Flag File Version ID: ${VERSION_ID}"
+        echo "S3 Feature Flag File Version ID: ${S3_FILE_VERSION_ID}"
         echo "S3_FILE_VERSION_ID=${S3_FILE_VERSION_ID}" >> $GITHUB_OUTPUT
 
