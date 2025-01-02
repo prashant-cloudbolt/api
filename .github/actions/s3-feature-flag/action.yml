@@ -42,7 +42,7 @@ runs:
         WORKING_DIR=${{ inputs.working-directory }}
         ENVIRONMENT=${{ inputs.environment }}
 
-        if [[ "$ENVIRONMENT" =~ ^(Development|Testing|Staging)$ ]]; then
+        if [[ "$ENVIRONMENT" == "Development" || "$ENVIRONMENT" == "Testing" || "$ENVIRONMENT" == "Staging" ]]; then
           FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/staging"
         elif [[ "$ENVIRONMENT" == "Production" ]]; then
           FEATURE_FLAG_PATH="$WORKING_DIR/services/feature_flag/production"
@@ -54,13 +54,9 @@ runs:
         echo "feature_flag_path=$FEATURE_FLAG_PATH" >> $GITHUB_ENV
 
     - name: Upload feature flag to S3 if modified
-      id: get-version
       shell: bash
       run: |
         bash ${{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh \
           "${{ inputs.feature-flag-s3-bucket }}" \
           "${{ inputs.feature-flag-file-name }}" \
           "${{ env.feature_flag_path }}"
-
-        echo "S3 Feature Flag File Version ID: ${{ steps.get-version.outputs.feature_flag_version_id }}"
-

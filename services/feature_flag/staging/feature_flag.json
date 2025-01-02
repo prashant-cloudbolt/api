@@ -11,7 +11,7 @@
             "provider_credentials_add_enabled": false,
             "chatbot_enabled": false,
             "policy_is_block_enabled": false,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     },
     "global-cloudbolt-tenant": {
@@ -25,7 +25,7 @@
             "provider_credentials_add_enabled": true,
             "chatbot_enabled": false,
             "policy_is_block_enabled": true,
-            "policy_if_block_enabled": false
+            "policy_if_block_enabled": true
         }
     },
     "1269a385-05ff-4b7c-b8f5-9d3bd8326f2b": {
