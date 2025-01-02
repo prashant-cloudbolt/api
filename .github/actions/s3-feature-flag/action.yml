@@ -62,5 +62,8 @@ runs:
           "${{ inputs.feature-flag-file-name }}" \
           "${{ env.feature_flag_path }}"
 
+    - name: Use Feature Flag Version
+      shell: bash
+      run: |
         echo "S3 Feature Flag File Version ID: ${{ steps.get-version.outputs.feature_flag_version_id }}"
 

@@ -53,4 +53,5 @@ else
   feature_flag_version_id=$(aws s3api list-object-versions --bucket "$BUCKET_NAME" --prefix "$FILE_NAME" --query "Versions[?IsLatest].VersionId" --output text)
   echo "No changes detected in $FILE_NAME. Skipping upload. Current version ID: $feature_flag_version_id"
   echo "feature_flag_version_id=${feature_flag_version_id}" >> $GITHUB_OUTPUT
+
 fi
