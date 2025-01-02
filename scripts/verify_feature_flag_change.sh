@@ -48,7 +48,7 @@ if [ "$local_feature_flag_md5" != "$s3_feature_flag_md5" ]; then
   aws s3 cp "$FEATURE_FLAG_PATH/$FILE_NAME" "s3://$BUCKET_NAME/"
   new_feature_flag_version_id=$(aws s3api list-object-versions --bucket "$BUCKET_NAME" --prefix "$FILE_NAME" --query "Versions[?IsLatest].VersionId" --output text)
   echo "Uploaded $  /$FILE_NAME with version ID: $new_feature_flag_version_id"
-  echo "FeatureFlagS3FileVersion=$new_feature_flag_version_id" >> $GITHUB_OUTPUT
+  echo "::set-output name=feature_flag_version_id::$new_feature_flag_version_id"
 else
   feature_flag_version_id=$(aws s3api list-object-versions --bucket "$BUCKET_NAME" --prefix "$FILE_NAME" --query "Versions[?IsLatest].VersionId" --output text)
   echo "No changes detected in $FILE_NAME. Skipping upload. Current version ID: $feature_flag_version_id"

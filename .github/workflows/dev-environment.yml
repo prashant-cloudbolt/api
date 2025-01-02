@@ -61,10 +61,7 @@ jobs:
     needs:
       - s3-feature-flag-development
     timeout-minutes: 45
-    runs-on:
-      - self-hosted
-      - ubuntu
-      - large
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
