@@ -20,6 +20,7 @@ jobs:
     outputs:
       stack-name: ${{ steps.get-stack-name.outputs.stack-name }}
       stack-name-slugified: ${{ steps.get-stack-name.outputs.stack-name-slugified }}
+      feature-flag-s3-bucket-slugified: ${{ steps.get-stack-name.outputs.feature-flag-s3-bucket-slugified }}
       truncate-stack-name: ${{ steps.truncate-stack-name.outputs.truncate-stack-name }}
     steps:
       - name: Checkout
@@ -86,4 +87,5 @@ jobs:
         run: |
           echo "stack-name: ${{ needs.get-stack-name.outputs.stack-name }}"
           echo "stack-name-slugified: ${{ needs.get-stack-name.outputs.stack-name-slugified }}"
+          echo "feature-flag-s3-bucket-slugified: ${{ needs.get-stack-name.outputs.feature-flag-s3-bucket-slugified }}"
           echo "truncate-stack-name: ${{ needs.get-stack-name.outputs.truncate-stack-name }}"

@@ -18,6 +18,9 @@ outputs:
       "The Stack name based of the github ref, all lowercase with only `-` special chars.
       Useful for URLs and domains."
     value: ${{ steps.vars.outputs.stack_name_slugified }}
+  feature-flag-s3-bucket-slugified:
+    description: "Feature flag s3 bucket name based of the github ref"
+    value: ${{ steps.vars.outputs.feature_flag_s3_bucket_slugified }}
 
 runs:
   using: composite
@@ -70,3 +73,7 @@ runs:
         )
         echo "Stack Name Slugified: '$stack_name_slugified'"
         echo "stack_name_slugified=$stack_name_slugified" >> "$GITHUB_OUTPUT"
+
+        feature_flag_s3_bucket_slugified="$stack_name_slugified-feature-flag-bucket"
+        echo "Feature Flag S3 Bucket Slugified: '$feature_flag_s3_bucket_slugified'"
+        echo "feature_flag_s3_bucket_slugified=$feature_flag_s3_bucket_slugified" >> "$GITHUB_OUTPUT"
