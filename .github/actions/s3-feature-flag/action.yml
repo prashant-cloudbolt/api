@@ -19,6 +19,10 @@ inputs:
     required: true
     default: '.'
 
+outputs:
+  feature_flag_version_id:
+    value: ${{ steps.get-version.outputs.feature_flag_version_id }}
+
 runs:
   using: 'composite'
   steps:
