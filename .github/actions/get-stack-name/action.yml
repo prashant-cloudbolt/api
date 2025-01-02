@@ -1,0 +1,72 @@
+name: Get Stack Name
+description: Get a Stack Name from the Github Ref
+
+inputs:
+  ref:
+    description: "The Git reference (e.g., a branch or tag) to use. If not provided, it uses the default GITHUB_REF."
+    required: false
+  postfix:
+    description: "A postfix to append to the stack name."
+    required: false
+
+outputs:
+  stack-name:
+    description: "The Stack name based of the github ref"
+    value: ${{ steps.vars.outputs.stack_name }}
+  stack-name-slugified:
+    description: |
+      "The Stack name based of the github ref, all lowercase with only `-` special chars.
+      Useful for URLs and domains."
+    value: ${{ steps.vars.outputs.stack_name_slugified }}
+
+runs:
+  using: composite
+  steps:
+    - id: vars
+      shell: bash -leo pipefail {0}
+      env:
+        # Use intermediary env variables to prevent untrusted input injection
+        # https://securitylab.github.com/research/github-actions-untrusted-input/
+        HEAD_REF: ${{ github.head_ref }}
+        BASE_REF: ${{ github.base_ref }}
+        REF_NAME: ${{ github.ref_name }}
+      run: |
+        # Use input ref if supplied, or the head_ref if not.
+        echo "For debugging purposes, these are different contextual refs:"
+        echo "inputs.ref: ${{ inputs.ref }}"
+        echo "GITHUB_REF: ${GITHUB_REF}"
+        echo "github.action_ref: ${{ github.action_ref }}"
+        echo "github.head_ref: ${HEAD_REF}"
+        echo "github.base_ref: ${BASE_REF}"
+        echo "github.ref_name: ${REF_NAME}"
+        echo "github.workflow_rme: ${{ github.workflow_ref }}"
+        echo "github.ref_type: ${{ github.ref_type }}"
+
+        # Will have inputs.ref in selected cases, head_ref in PR branches with a base,
+        # and ref_name in a base/main branch (like develop)
+        git_ref="${{ inputs.ref || github.head_ref || github.ref_name }}"
+
+        stack_name=$(
+          echo "${git_ref##*/}" |
+          tr -cd 'a-zA-Z0-9-'
+        )
+        # Abort if there's no stack name.
+        if [[ -z "$stack_name" ]]; then
+          echo "Empty Stack Name" 
+          exit 1 
+        fi
+        echo "Stack Name: '$stack_name'"
+        if [[ -n "${{ inputs.postfix }}" ]]; then
+          stack_name="${stack_name}-${{inputs.postfix}}"
+        fi
+        echo "stack_name=$stack_name" >> "$GITHUB_OUTPUT"
+
+        stack_name_slugified=$(
+          echo "$stack_name" | 
+          tr '[:upper:]' '[:lower:]' | 
+          tr -s '[:space:]' '-' | 
+          tr -cd '[:alnum:]-' | 
+          sed -E 's/-+$//'
+        )
+        echo "Stack Name Slugified: '$stack_name_slugified'"
+        echo "stack_name_slugified=$stack_name_slugified" >> "$GITHUB_OUTPUT"

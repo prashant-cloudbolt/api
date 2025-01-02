@@ -14,9 +14,32 @@ permissions:
   deployments: write
 
 jobs:
+  get-stack-name:
+    name: Get Stack Name
+    runs-on: ubuntu-latest
+    outputs:
+      stack-name: ${{ steps.get-stack-name.outputs.stack-name }}
+      stack-name-slugified: ${{ steps.get-stack-name.outputs.stack-name-slugified }}
+      truncate-stack-name: ${{ steps.truncate-stack-name.outputs.truncate-stack-name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Stack Name
+        id: get-stack-name
+        uses: ./.github/actions/get-stack-name
+        with:
+          ref: ${{ env.TARGET_REF }}
+
+      - name: Truncate Stack Name
+        id: truncate-stack-name
+        run: echo "truncate-stack-name=${{ steps.get-stack-name.outputs.stack-name }}" | cut -c1-30  >> "$GITHUB_OUTPUT"
+
   s3-feature-flag-development:
     name: S3 Feature Flag
     runs-on: ubuntu-latest
+    needs:
+      - get-stack-name
 
     outputs:
       feature_flag_version_id: ${{ steps.s3-feature-flag.outputs.feature_flag_version_id }}
@@ -34,20 +57,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Get modified files and check for file.json
-        run: |
-          # Get the list of modified files
-          modified_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          
-          # Directly check if the specific file is in the modified files list
-          if echo "$modified_files" | grep -q "services/feature_flag/staging/feature_flag.json"; then
-            echo "services/feature_flag/staging/feature_flag.json has been modified."
-            echo "file_modified=true" >> $GITHUB_ENV
-          else
-            echo "services/feature_flag/staging/feature_flag.json has NOT been modified."
-            echo "file_modified=false" >> $GITHUB_ENV
-          fi
-
       - name: Create S3 bucket and upload feature flag
         continue-on-error: true
         id: s3-feature-flag
@@ -64,6 +73,7 @@ jobs:
     # This job builds and packages the latest release of the mira-serverless
     name: Build, Package, and Deploy MIRA Serverless Latest Changes to Development
     needs:
+      - get-stack-name
       - s3-feature-flag-development
     timeout-minutes: 45
     runs-on: ubuntu-latest
@@ -74,4 +84,6 @@ jobs:
       
       - name: Echo Feature Flag Version
         run: |
-          echo "Building package with feature flag version: ${{ needs.s3-feature-flag-development.outputs.feature_flag_version_id }}"
+          echo "stack-name: ${{ needs.get-stack-name.outputs.stack-name }}"
+          echo "stack-name-slugified: ${{ needs.get-stack-name.outputs.stack-name-slugified }}"
+          echo "truncate-stack-name: ${{ needs.get-stack-name.outputs.truncate-stack-name }}"
