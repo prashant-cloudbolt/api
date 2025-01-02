@@ -14,9 +14,8 @@ permissions:
   deployments: write
 
 jobs:
-  deploy-dev:
-    name: Deploy to Mira Development Environment
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+  s3-feature-flag-development:
+    name: S3 Feature Flag
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -55,3 +54,19 @@ jobs:
           feature-flag-s3-bucket: ${{ vars.FEATURE_FLAG_S3_BUCKET }}
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           working-directory: "."
+
+  build-package-deploy-development:
+    # This job builds and packages the latest release of the mira-serverless
+    name: Build, Package, and Deploy MIRA Serverless Latest Changes to Development
+    needs:
+      - s3-feature-flag-development
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Echo Feature Flag Version
+        run: |
+          echo "feature flag version"

@@ -54,9 +54,13 @@ runs:
         echo "feature_flag_path=$FEATURE_FLAG_PATH" >> $GITHUB_ENV
 
     - name: Upload feature flag to S3 if modified
+      id: get-version
       shell: bash
       run: |
         bash ${{ inputs.working-directory }}/scripts/verify_feature_flag_change.sh \
           "${{ inputs.feature-flag-s3-bucket }}" \
           "${{ inputs.feature-flag-file-name }}" \
           "${{ env.feature_flag_path }}"
+
+        echo "S3 Feature Flag File Version ID: ${{ steps.get-version.outputs.feature_flag_version_id }}"
+
