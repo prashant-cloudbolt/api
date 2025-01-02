@@ -60,4 +60,4 @@ jobs:
         uses: ./.github/actions/delete-feature-flag-bucket/
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          bucket-name: steps.get-stack-name.outputs.feature-flag-s3-bucket-slugified
+          bucket-name: ${{ steps.get-stack-name.outputs.feature-flag-s3-bucket-slugified }}
