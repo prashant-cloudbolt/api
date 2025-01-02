@@ -62,6 +62,5 @@ runs:
           "${{ inputs.feature-flag-file-name }}" \
           "${{ env.feature_flag_path }}"
 
-        echo "S3 Feature Flag File Version ID: ${S3_FILE_VERSION_ID}"
-        echo "S3_FILE_VERSION_ID=${S3_FILE_VERSION_ID}" >> $GITHUB_OUTPUT
+        echo "S3 Feature Flag File Version ID: ${feature_flag_version_id}"
 
