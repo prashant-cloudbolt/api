@@ -21,41 +21,53 @@ runs:
         RED='\033[0;31m'
         NC='\033[0m'
 
-        # Check if the bucket exists and delete it if so
+        # Check if the bucket exists
         echo -e "${YELLOW}Checking if S3 bucket '${{ inputs.bucket-name }}' exists...${NC}"
-        bucket_status=$(aws s3api head-bucket --bucket ${{ inputs.bucket-name }} --region ${{ inputs.aws-region }} --output text 2>&1)
-        
-        if echo "${bucket_status}" | grep 'Not Found'; then
-          echo -e "${YELLOW}Bucket '${{ inputs.bucket-name }}' not found, it may already be deleted.${NC}"
+        bucket_status=$(aws s3api head-bucket --bucket "${{ inputs.bucket-name }}" --region "${{ inputs.aws-region }}" 2>&1)
+
+        if echo "$bucket_status" | grep -q 'Not Found'; then
+          echo -e "${YELLOW}Bucket '${{ inputs.bucket-name }}' not found. It may already be deleted.${NC}"
+          exit 0
+        fi
+
+        # Bucket exists; proceed to empty and delete
+        echo -e "${YELLOW}Emptying bucket '${{ inputs.bucket-name }}'...${NC}"
+
+        # Check if the bucket has versioning enabled
+        versioning_status=$(aws s3api get-bucket-versioning --bucket "${{ inputs.bucket-name }}" --region "${{ inputs.aws-region }}" --query "Status" --output text)
+        if [[ "$versioning_status" == "Enabled" ]]; then
+          echo -e "${YELLOW}Bucket '${{ inputs.bucket-name }}' has versioning enabled. Deleting all object versions...${NC}"
+
+          # Fetch and delete all object versions
+          VERSIONS=$(aws s3api list-object-versions --bucket "${{ inputs.bucket-name }}" --region "${{ inputs.aws-region }}" --query "Versions[].{Key:Key,VersionId:VersionId}" --output text)
+          if [ -n "$VERSIONS" ]; then
+            while IFS=$'\t' read -r KEY VERSION_ID; do
+              echo "Deleting version: $VERSION_ID for object: $KEY"
+              aws s3api delete-object --bucket "${{ inputs.bucket-name }}" --key "$KEY" --version-id "$VERSION_ID"
+            done <<< "$VERSIONS"
+          fi
+
+          # List and delete all delete markers
+          echo "Deleting all delete markers from bucket: ${{ inputs.bucket-name }}"
+          DELETE_MARKERS=$(aws s3api list-object-versions --bucket "${{ inputs.bucket-name }}" --query "DeleteMarkers[].{Key:Key,VersionId:VersionId}" --output text)
+
+          if [ -n "$DELETE_MARKERS" ]; then
+            while IFS=$'\t' read -r KEY VERSION_ID; do
+              echo "Deleting delete marker: $VERSION_ID for object: $KEY"
+              aws s3api delete-object --bucket "${{ inputs.bucket-name }}" --key "$KEY" --version-id "$VERSION_ID"
+            done <<< "$DELETE_MARKERS"
+          fi
+
         else
-          # Bucket exists; proceed to empty and delete
-          echo -e "${YELLOW}Emptying bucket '${{ inputs.bucket-name }}'...${NC}"
+          echo -e "${YELLOW}Bucket '${{ inputs.bucket-name }}' does not have versioning enabled. Deleting objects recursively...${NC}"
+          aws s3 rm "s3://${{ inputs.bucket-name }}" --recursive
+        fi
 
-          # Check if bucket has versioning enabled
-          versioning_status=$(aws s3api get-bucket-versioning --bucket ${{ inputs.bucket-name }} --region ${{ inputs.aws-region }} --query "Status" --output text)
-          if [[ "$versioning_status" == "Enabled" ]]; then
-            echo -e "${YELLOW}Bucket '${{ inputs.bucket-name }}' has versioning enabled. Deleting all object versions...${NC}"
-
-            # Delete all versions of objects in the bucket
-            object_versions=$(aws s3api list-object-versions --bucket ${{ inputs.bucket-name }} --region ${{ inputs.aws-region }} --query "Versions[].[VersionId,Key]" --output text)
-            if [[ -n "$object_versions" ]]; then
-              for object in $(echo "$object_versions" | awk '{print $2}'); do
-                version_id=$(echo "$object_versions" | grep "$object" | awk '{print $1}')
-                aws s3api delete-object --bucket ${{ inputs.bucket-name }} --key "$object" --version-id "$version_id" --region ${{ inputs.aws-region }}
-                echo -e "${YELLOW}Deleted version $version_id of object '$object'.${NC}"
-              done
-            fi
-          else
-            echo -e "${YELLOW}Bucket '${{ inputs.bucket-name }}' does not have versioning enabled. Skipping version deletion.${NC}"
-            aws s3 rm s3://${{ inputs.bucket-name }} --recursive
-          fi
-
-          # Delete the bucket itself
-          echo -e "${YELLOW}Deleting bucket '${{ inputs.bucket-name }}'...${NC}"
-          if aws s3api delete-bucket --bucket ${{ inputs.bucket-name }} --region ${{ inputs.aws-region }}; then
-            echo -e "${GREEN}Bucket '${{ inputs.bucket-name }}' deleted successfully.${NC}"
-          else
-            echo -e "${RED}Failed to delete bucket '${{ inputs.bucket-name }}'.${NC}"
-            exit 1
-          fi
+        # Delete the bucket
+        echo -e "${YELLOW}Deleting bucket '${{ inputs.bucket-name }}'...${NC}"
+        if aws s3api delete-bucket --bucket "${{ inputs.bucket-name }}" --region "${{ inputs.aws-region }}"; then
+          echo -e "${GREEN}Bucket '${{ inputs.bucket-name }}' deleted successfully.${NC}"
+        else
+          echo -e "${RED}Failed to delete bucket '${{ inputs.bucket-name }}'.${NC}"
+          exit 1
         fi
