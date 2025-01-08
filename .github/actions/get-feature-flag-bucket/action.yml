@@ -41,15 +41,24 @@ runs:
         # and ref_name in a base/main branch (like develop)
         git_ref="${{ inputs.ref || github.head_ref || github.ref_name }}"
 
-        feature_flag_s3_bucket=$(
+        branch_name=$(
           echo "${git_ref##*/}" |
           tr -cd 'a-zA-Z0-9-'
         )
         # Abort if there's no stack name.
-        if [[ -z "$feature_flag_s3_bucket" ]]; then
-          echo "Empty Stack Name" 
+        if [[ -z "$branch_name" ]]; then
+          echo "Empty Branch Name" 
           exit 1 
         fi
-        echo "Stack Name: '$feature_flag_s3_bucket'"
+        echo "Branch Name: '$branch_name'"
+
+        branch_name_slugified=$(
+          echo "$branch_name" | 
+          tr '[:upper:]' '[:lower:]' | 
+          tr -s '[:space:]' '-' | 
+          tr -cd '[:alnum:]-' | 
+          sed -E 's/-+$//'
+        )
+        echo "Branch Name Slugified: '$branch_name_slugified'"
 
         echo "feature_flag_s3_bucket=$feature_flag_s3_bucket" >> "$GITHUB_OUTPUT"
