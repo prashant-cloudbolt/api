@@ -43,7 +43,7 @@ jobs:
       - get-stack-name
 
     outputs:
-      feature_flag_version_id: ${{ steps.s3-feature-flag.outputs.feature_flag_version_id }}
+      feature-flag-s3-bucket: ${{ steps.get-feature-flag-s3.outputs.feature-flag-s3-bucket }}
 
     steps:
       - name: Checkout
@@ -64,7 +64,7 @@ jobs:
         with:
           ref: ${{ env.TARGET_REF }}
 
-      - name: Echo Feature Flag Version
+      - name: Feature Flag Bucket
         run: |
           echo "feature flag s3 bucket: ${{ steps.get-feature-flag-s3.outputs.feature-flag-s3-bucket }}"
 
@@ -75,7 +75,7 @@ jobs:
         with:
           environment: "Development"
           region: ${{ vars.AWS_REGION }}
-          feature-flag-s3-bucket: ${{ needs.get-stack-name.outputs.feature-flag-s3-bucket-slugified }}
+          feature-flag-s3-bucket: ${{ steps.get-feature-flag-s3.outputs.feature-flag-s3-bucket }}
           feature-flag-file-name: ${{ vars.FEATURE_FLAG_FILE_NAME }}
           working-directory: "."
 
@@ -92,9 +92,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Echo Feature Flag Version
+      - name: Feature Flag Bucket
         run: |
-          echo "stack-name: ${{ needs.get-stack-name.outputs.stack-name }}"
-          echo "stack-name-slugified: ${{ needs.get-stack-name.outputs.stack-name-slugified }}"
-          echo "feature-flag-s3-bucket-slugified: ${{ needs.get-stack-name.outputs.feature-flag-s3-bucket-slugified }}"
-          echo "truncate-stack-name: ${{ needs.get-stack-name.outputs.truncate-stack-name }}"
+          echo "feature flag s3 bucket: ${{ needs.s3-feature-flag-development.outputs.feature-flag-s3-bucket }}"
