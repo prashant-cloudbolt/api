@@ -14,4 +14,4 @@ git add .
 
 # Commit the changes with the provided message
 git commit -m "$commit_message"
-git push origin featureflag-s3
+git push origin CP-2104-BE-Policy-Status-Add-Policy-Name-in-Action-Detail-Api
