@@ -58,6 +58,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRETS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: Get FeatureFlag S3Bucket Name
+        id: get-feature-flag-s3
+        uses: ./.github/actions/get-feature-flag-bucket
+        with:
+          ref: ${{ env.TARGET_REF }}
+
+      - name: Echo Feature Flag Version
+        run: |
+          echo "feature flag s3 bucket: ${{ steps.get-feature-flag-s3.outputs.feature-flag-s3-bucket }}"
+
       - name: Create S3 bucket and upload feature flag
         continue-on-error: true
         id: s3-feature-flag
