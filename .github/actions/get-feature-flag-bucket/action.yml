@@ -1,5 +1,5 @@
-name: Get Stack Name
-description: Get a Stack Name from the Github Ref
+name: Generate Feature Flag S3 Bucket Name
+description: Generate a slugified S3 bucket name for feature flags based on the GitHub reference
 
 inputs:
   ref:
@@ -11,8 +11,8 @@ inputs:
 
 outputs:
   feature-flag-s3-bucket:
-    description: "Feature flag s3 bucket name based of the github ref"
-    value: ${{ steps.vars.outputs.feature_flag_s3_bucket }}
+    description: "Feature flag S3 bucket name based on the GitHub ref"
+    value: ${{ steps.vars.outputs.feature_flag_s3_bucket_slugified }}
 
 runs:
   using: composite
@@ -20,36 +20,51 @@ runs:
     - id: vars
       shell: bash -leo pipefail {0}
       env:
-        # Use intermediary env variables to prevent untrusted input injection
-        # https://securitylab.github.com/research/github-actions-untrusted-input/
         HEAD_REF: ${{ github.head_ref }}
         BASE_REF: ${{ github.base_ref }}
         REF_NAME: ${{ github.ref_name }}
       run: |
-        # Use input ref if supplied, or the head_ref if not.
-        echo "For debugging purposes, these are different contextual refs:"
-        echo "inputs.ref: ${{ inputs.ref }}"
-        echo "GITHUB_REF: ${GITHUB_REF}"
-        echo "github.action_ref: ${{ github.action_ref }}"
-        echo "github.head_ref: ${HEAD_REF}"
-        echo "github.base_ref: ${BASE_REF}"
-        echo "github.ref_name: ${REF_NAME}"
-        echo "github.workflow_rme: ${{ github.workflow_ref }}"
-        echo "github.ref_type: ${{ github.ref_type }}"
-
         # Will have inputs.ref in selected cases, head_ref in PR branches with a base,
         # and ref_name in a base/main branch (like develop)
         git_ref="${{ inputs.ref || github.head_ref || github.ref_name }}"
 
-        feature_flag_s3_bucket=$(
+        branch_name=$(
           echo "${git_ref##*/}" |
           tr -cd 'a-zA-Z0-9-'
         )
+
         # Abort if there's no stack name.
-        if [[ -z "$feature_flag_s3_bucket" ]]; then
+        if [[ -z "$branch_name" ]]; then
           echo "Empty Stack Name" 
           exit 1 
         fi
-        echo "Stack Name: '$feature_flag_s3_bucket'"
 
+        echo "Branch Name: '$branch_name'"
+        echo "branch_name=$branch_name" >> "$GITHUB_OUTPUT"
+
+        branch_name_slugified=$(
+          echo "$branch_name" | 
+          tr '[:upper:]' '[:lower:]' | 
+          tr -s '[:space:]' '-' | 
+          tr -cd '[:alnum:]-' | 
+          sed -E 's/-+$//'
+        )
+
+        echo "Branch Name Slugified: '$branch_name_slugified'"
+        echo "branch_name_slugified=$branch_name_slugified" >> "$GITHUB_OUTPUT"
+
+        feature_flag_s3_bucket="${branch_name_slugified}-feature-flag-bucket"
+
+        # Check if the S3 bucket name exceeds 63 characters
+        if [[ ${#feature_flag_s3_bucket} -gt 63 ]]; then
+          echo "❌ Error: The generated feature flag S3 bucket name exceeds the 63-character limit."
+          echo "🔎 Current Branch Name: '$branch_name'"
+          echo "🪣 Generated Bucket Name: '$feature_flag_s3_bucket' (${#feature_flag_s3_bucket} characters)"
+          echo "⚠️  S3 bucket names must be 63 characters or fewer."
+          echo "💡 Action Required: Please shorten your branch name to ensure the bucket name stays within the limit."
+          echo "ℹ️  Note: The feature flag S3 bucket name is generated based solely on the branch name."
+          exit 1
+        fi
+
+        echo "Feature Flag S3 Bucket: '$feature_flag_s3_bucket'"
         echo "feature_flag_s3_bucket=$feature_flag_s3_bucket" >> "$GITHUB_OUTPUT"
