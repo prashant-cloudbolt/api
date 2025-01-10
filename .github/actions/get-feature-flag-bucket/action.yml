@@ -12,7 +12,7 @@ inputs:
 outputs:
   feature-flag-s3-bucket:
     description: "Feature flag S3 bucket name based on the GitHub ref"
-    value: ${{ steps.vars.outputs.feature_flag_s3_bucket_slugified }}
+    value: ${{ steps.vars.outputs.feature_flag_s3_bucket }}
 
 runs:
   using: composite
