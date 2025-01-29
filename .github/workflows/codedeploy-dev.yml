@@ -23,3 +23,9 @@ jobs:
         name: Checkout Repository
         with:
           ref: multi_tenant_dev
+
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo $branch_name
+          echo "ENV name is : ${{ vars.ENV }}"

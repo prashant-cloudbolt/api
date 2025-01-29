@@ -2,15 +2,6 @@ name: api-mirastage-codedeploy
 
 on:
   workflow_call:
-    inputs:
-      codedeploy_rollback:
-        description: "Trigger rollback in dependent workflow if value is True"
-        required: false
-        type: string
-
-  push:
-    branches:
-      - multi_tenant_stage
 
 permissions:
   id-token: write 
@@ -30,3 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: Checkout Repository
+        with:
+          ref: multi_tenant_stage
+
+      - name: Echo Branch name
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo $branch_name
+          echo "ENV name is : ${{ vars.ENV }}"
