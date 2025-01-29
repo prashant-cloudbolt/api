@@ -1,0 +1,29 @@
+name: api-stage-codedeploy
+
+on:
+  workflow_call:
+    inputs:
+      codedeploy_rollback:
+        description: "Trigger rollback in dependent workflow if value is True"
+        required: false
+        type: string
+
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  codedeploy:
+    name: Trigger codedeploy with latest commit to Stage Oregon
+    runs-on: ubuntu-latest
+
+    environment:
+      name: STAGE
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository

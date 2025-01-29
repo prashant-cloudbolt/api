@@ -1,0 +1,25 @@
+name: api-dev-codedeploy
+
+on:
+  workflow_call:
+
+permissions:
+  id-token: write 
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  codedeploy:
+    name: Codedeploy with latest commit to Dev Ohio
+    runs-on: ubuntu-latest
+
+    environment:
+      name: DEV
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+        with:
+          ref: multi_tenant_dev
