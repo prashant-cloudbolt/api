@@ -49,3 +49,7 @@ jobs:
            # Convert suffix to uppercase
            branch_suffix=$(tr '[:lower:]' '[:upper:]' <<< "$branch_suffix")
            echo "branch_suffix=$branch_suffix" >> $GITHUB_OUTPUT
+
+      - name: Print branch suffix again
+        run: |
+          echo "Branch suffix: ${{ steps.determine-branch-suffix.outputs.branch_suffix }}"
