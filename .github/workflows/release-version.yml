@@ -33,6 +33,7 @@ jobs:
       - name: Determine branch suffix
         id: determine-branch-suffix
         run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
           branch_suffix=$(echo "$branch_name" | sed 's/multi_tenant_//; s/-//g')
           echo "branch_suffix = $branch_suffix"
 
