@@ -1,0 +1,51 @@
+name: release-api-version
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: string
+      branch:
+        description: "Github branch name to deploy"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  security-events: write
+  actions: read
+
+jobs:
+  generate-tag:
+    name: Generate tag
+    runs-on: ubuntu-latest
+    outputs:
+      current-version: ${{ steps.version-tag.outputs.tag }}
+      next-version: CSMP-${{steps.determine-branch-suffix.outputs.branch_suffix}}-API-v${{ steps.increment-semantic-version.outputs.next-version }}
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+
+      - name: Determine branch suffix
+        id: determine-branch-suffix
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          case $branch_name in
+            multi_tenant_*)
+              branch_suffix=$(echo "$branch_name" | sed 's/multi_tenant_//; s/-//g')
+              ;;
+            mira-stage)
+              branch_suffix="STAGE"
+              ;;
+            *)
+              echo "Unsupported branch: $branch_name"
+              exit 1
+              ;;
+          esac
+           # Convert suffix to uppercase
+           branch_suffix=$(tr '[:lower:]' '[:upper:]' <<< "$branch_suffix")
+           echo "branch_suffix=$branch_suffix" >> $GITHUB_OUTPUT
