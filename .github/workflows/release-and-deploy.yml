@@ -46,3 +46,20 @@ jobs:
       environment: CSMP_Stage
       branch: multi_tenant_stage
     secrets: inherit
+
+  #############################################################
+  ## Reuse workflow for MIRA Stage
+  #############################################################
+  codedeploy_mirastage:
+    if: github.ref == 'refs/heads/multi_tenant_stage'
+    uses: ./.github/workflows/codedeploy-mirastage.yml
+    secrets: inherit
+
+  release_mirastage:
+    needs: [codedeploy_mirastage]
+    if: github.ref == 'refs/heads/multi_tenant_stage'
+    uses: ./.github/workflows/release-version.yml
+    with:
+      environment: Mira_Stage
+      branch: multi_tenant_stage
+    secrets: inherit
