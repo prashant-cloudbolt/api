@@ -29,3 +29,19 @@ jobs:
           branch_name="${GITHUB_REF#refs/heads/}"
           echo $branch_name
           echo "ENV name is : ${{ vars.ENV }}"
+
+      - name: Pause ASG termination process
+        id: pause_asg
+        run: |
+          echo "pause ASG"
+
+      - name: Trigger CodeDeploy Deployment for Node API
+        run: |
+          exit 1
+
+      - name: Resume ASG termination process
+        if: always() && steps.pause_asg.conclusion == 'success'
+        env:
+          APPLICATION_NAME: ${{ vars.CODEDEPLOY_APPLICATION }}
+        run: |
+          echo "Aways run even if Trigger CodeDeploy Deployment for Node API fail"
