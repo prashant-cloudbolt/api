@@ -34,6 +34,7 @@ jobs:
         id: pause_asg
         run: |
           echo "pause ASG"
+          exit 0
 
       - name: Trigger CodeDeploy Deployment for Node API
         run: |
