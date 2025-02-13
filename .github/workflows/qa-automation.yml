@@ -94,13 +94,14 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     outputs:
-      job_status: ${{ steps.job_status.outputs.status }}
+      job_status: ${{ steps.set_status.outputs.status }}
     steps:
       - name: Set final job status
-        id: status
+        id: set_status
         run: |
           if [ "${{ needs.qa_tests.result }}" == "success" ]; then
             echo "status=success" >> $GITHUB_OUTPUT
           else
             echo "status=failure" >> $GITHUB_OUTPUT
           fi
+
