@@ -33,7 +33,7 @@ jobs:
       - name: Run ${{ matrix.workflow_name }} workflow
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: gh workflow run ${{ matrix.workflow_name }} --repo CloudBoltSoftware/qa-automation
+        run: gh workflow run ${{ matrix.workflow_name }} --repo prashant-cloudbolt/qa-automation
 
       - name: Get Workflow Run ID of ${{ matrix.workflow_name }}
         id: get_run_id
@@ -46,7 +46,7 @@ jobs:
 
           while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
             echo "Attempt $((attempt + 1)) to retrieve workflow run ID"
-            workflow_list=$(gh run list --repo CloudBoltSoftware/qa-automation --workflow=${{ matrix.workflow_name }} --limit=1 --json databaseId)
+            workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=${{ matrix.workflow_name }} --limit=1 --json databaseId)
             
             if [ -z "$workflow_list" ]; then
               echo "Workflow run ID not yet available. Retrying..."
@@ -63,24 +63,23 @@ jobs:
           fi
 
           run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
+          echo "Run ID of ${{ matrix.workflow_name }} : $run_id"
           echo "run_id=$run_id" >> $GITHUB_ENV
 
       - name: Check Status of ${{ matrix.workflow_name }}
         id: check_status
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        continue-on-error: true
         run: |
           status=""
           while [ "$status" != "completed" ]; do
-            status=$(gh run view ${{ env.run_id }} --repo CloudBoltSoftware/qa-automation --json status --jq '.status')
+            status=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
             echo "Current status: $status"
             if [ "$status" == "completed" ]; then
-              conclusion=$(gh run view ${{ env.run_id }} --repo CloudBoltSoftware/qa-automation --json conclusion --jq '.conclusion')
+              conclusion=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
               echo "Final conclusion: $conclusion"
               if [ "$conclusion" != "success" ]; then
                 echo "status=failure" >> $GITHUB_OUTPUT
-                exit 1
               else
                 echo "status=success" >> $GITHUB_OUTPUT
               fi
