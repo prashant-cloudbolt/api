@@ -73,3 +73,5 @@ jobs:
           else
             commit_hash=${{ env.commit_hash }}
           fi
+
+          echo "Deploying $commit_hash"
