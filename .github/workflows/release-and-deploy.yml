@@ -28,13 +28,13 @@ jobs:
     uses: ./.github/workflows/qa-automation.yml
     secrets: inherit
 
-  # test:
-  #   needs: [qa_automation]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Debug QA Job Status
-  #       run: |
-  #         echo "QA Job Status: ${{ needs.qa_automation.outputs.job_status }}"
+  test:
+    needs: [qa_automation]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug QA Job Status
+        run: |
+          echo "QA Job Status: ${{ needs.qa_automation.outputs.job_status }}"
 
   codedeploy_rollback_stage:
     if: ${{ needs.qa_automation.outputs.job_status == 'failure' && github.ref == 'refs/heads/multi_tenant_stage' }}
@@ -46,7 +46,7 @@ jobs:
 
   release_stage:
     if: ${{ needs.qa_automation.outputs.job_status == 'success' && github.ref == 'refs/heads/multi_tenant_stage' }}
-    needs: [codedeploy_rollback_stage, qa_automation]
+    needs: [codedeploy_stage, qa_automation]
     uses: ./.github/workflows/release-version.yml
     with:
       environment: CSMP_Stage
