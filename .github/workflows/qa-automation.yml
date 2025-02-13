@@ -69,6 +69,7 @@ jobs:
 
       - name: Check Status of ${{ matrix.workflow_name }}
         id: check_status
+        continue-on-error: true  # Continue even if the command fails, so output is set correctly
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
