@@ -81,6 +81,7 @@ jobs:
               echo "Final conclusion: $conclusion"
               if [ "$conclusion" != "success" ]; then
                 echo "status=failure"
+                exit 1
               else
                 echo "status=success"
               fi
@@ -91,6 +92,7 @@ jobs:
   qa_jobs_status:
     needs: [qa_tests]
     runs-on: ubuntu-latest
+    if: always()
     outputs:
       job_status: ${{ steps.job_status.outputs.status }}
     steps:
