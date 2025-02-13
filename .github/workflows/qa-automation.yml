@@ -5,7 +5,7 @@ on:
     outputs:
       job_status:
         description: "QA Automation job status"
-        value: ${{ jobs.qa_tests.outputs.job_status }}
+        value: ${{ jobs.qa_jobs_status.outputs.job_status }}
 
 permissions:
   id-token: write 
@@ -17,8 +17,6 @@ permissions:
 jobs:
   qa_tests:
     runs-on: ubuntu-latest
-    outputs:
-      job_status: ${{ steps.check_status.outputs.status }}
     strategy:
       fail-fast: false
       matrix:
@@ -82,25 +80,27 @@ jobs:
               conclusion=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
               echo "Final conclusion: $conclusion"
               if [ "$conclusion" != "success" ]; then
-                echo "status=failure" >> $GITHUB_OUTPUT
+                echo "status=failure"
                 exit 1
               else
-                echo "status=success" >> $GITHUB_OUTPUT
+                echo "status=success"
               fi
             fi
             sleep 15
           done
 
-  # finalize_status:
-  #   needs: qa_tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Set final job status
-  #       id: set_status
-  #       run: |
-  #         if [ "${{ needs.qa_tests.result }}" == "success" ]; then
-  #           echo "status=success" >> $GITHUB_OUTPUT
-  #         else
-  #           echo "status=failure" >> $GITHUB_OUTPUT
-  #           exit 1
-  #         fi
+  qa_jobs_status:
+    needs: [qa_tests]
+    runs-on: ubuntu-latest
+    outputs:
+      job_status: ${{ steps.job_status.outputs.status }}
+    steps:
+      - name: Set final job status
+        id: status
+        run: |
+          if [ "${{ needs.qa_tests.result }}" == "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
