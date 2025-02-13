@@ -1,5 +1,5 @@
 
-Release Notes - Version 1.141.0
+Release Notes - Version 1.142.0
 
   - https://cloudbolt.atlassian.net/projects/CSMP/versions/12420/tab/release-report-all-issues
   - CSMP-29781
