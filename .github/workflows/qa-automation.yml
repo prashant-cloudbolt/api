@@ -33,7 +33,10 @@ jobs:
       - name: Run ${{ matrix.workflow_name }} workflow
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: gh workflow run ${{ matrix.workflow_name }} --repo prashant-cloudbolt/qa-automation
+        run: |
+          gh workflow run ${{ matrix.workflow_name }} --repo prashant-cloudbolt/qa-automation
+          echo "Waiting 10 seconds before checking for workflow run ID..."
+          sleep 10
 
       - name: Get Workflow Run ID of ${{ matrix.workflow_name }}
         id: get_run_id
