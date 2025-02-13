@@ -45,22 +45,30 @@ jobs:
     uses: ./.github/workflows/qa-automation.yml
     secrets: inherit
 
-  codedeploy_rollback_stage:
-    if: ${{ needs.qa_automation.outputs.job_status == 'failure' && github.ref == 'refs/heads/multi_tenant_stage' }}
-    needs: [codedeploy_stage, qa_automation]
-    uses: ./.github/workflows/codedeploy-stage.yml
-    with:
-      codedeploy_rollback: True
-    secrets: inherit
+  test:
+    needs: [qa_automation]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug QA Job Status
+        run: |
+          echo "QA Job Status: ${{ needs.qa_automation.outputs.job_status }}"
 
-  release_stage:
-    if: ${{ needs.qa_automation.outputs.job_status == 'success' && github.ref == 'refs/heads/multi_tenant_stage' }}
-    needs: [codedeploy_rollback_stage, qa_automation]
-    uses: ./.github/workflows/release-version.yml
-    with:
-      environment: CSMP_Stage
-      branch: multi_tenant_stage
-    secrets: inherit
+  # codedeploy_rollback_stage:
+  #   if: ${{ needs.qa_automation.outputs.job_status == 'failure' && github.ref == 'refs/heads/multi_tenant_stage' }}
+  #   needs: [codedeploy_stage, qa_automation]
+  #   uses: ./.github/workflows/codedeploy-stage.yml
+  #   with:
+  #     codedeploy_rollback: True
+  #   secrets: inherit
+
+  # release_stage:
+  #   if: ${{ needs.qa_automation.outputs.job_status == 'success' && github.ref == 'refs/heads/multi_tenant_stage' }}
+  #   needs: [codedeploy_rollback_stage, qa_automation]
+  #   uses: ./.github/workflows/release-version.yml
+  #   with:
+  #     environment: CSMP_Stage
+  #     branch: multi_tenant_stage
+  #   secrets: inherit
 
   # #############################################################
   # ## Reuse workflow for MIRA Stage
