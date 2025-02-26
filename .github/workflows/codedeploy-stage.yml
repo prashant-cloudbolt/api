@@ -81,10 +81,10 @@ jobs:
             ':x: CSMP Stage Smoke Test Runner'
 
             :warning: *Automatic rollback to the previous version has been initiated!* :warning:
-            echo "Branch Suffix: ${{ env.branch_suffix }}"
-            echo "Current Release: ${{ env.latest_release }}"
-            echo "Current Release Tag: ${{ env.release_tag }}"
-            echo "Commit Hash of Tag: ${{ env.commit_hash }}"
+            Branch Suffix: ${{ env.branch_suffix }}
+            Current Release: ${{ env.latest_release }}
+            Current Release Tag: ${{ env.release_tag }}
+            Commit Hash of Tag: ${{ env.commit_hash }}
 
             Repository: ${{ github.repository }}
             Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
