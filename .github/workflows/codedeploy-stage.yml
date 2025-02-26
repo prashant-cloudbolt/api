@@ -81,10 +81,8 @@ jobs:
             ':x: CSMP Stage Smoke Test Runner'
 
             :warning: *Automatic rollback to the previous version has been initiated!* :warning:
-            Branch Suffix: ${{ env.branch_suffix }}
-            Current Release: ${{ env.latest_release }}
-            Current Release Tag: ${{ env.release_tag }}
-            Commit Hash of Tag: ${{ env.commit_hash }}
+            Rollback Vesion: ${{ env.release_tag }}
+            Rollback Commit Hash: ${{ env.commit_hash }}
 
             Repository: ${{ github.repository }}
             Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
