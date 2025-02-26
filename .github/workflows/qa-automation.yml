@@ -116,7 +116,7 @@ jobs:
             :rotating_light: *QA Automation Failed* :rotating_light:
 
             The following tests failed:
-            "${{ needs.qa_tests.result == 'failure' && ':x: Stage CSMP V2 API Test Job' || ':white_check_mark: Stage CSMP V2 API Test Job' }}
+            ${{ needs.qa_tests.result == 'failure' && ':x: Stage CSMP V2 API Test Job' || ':white_check_mark: Stage CSMP V2 API Test Job' }}
             ${{ needs.qa_tests.result == 'failure' && ':x: CSMP Stage Smoke Test Runner' || ':white_check_mark: CSMP Stage Smoke Test Runner' }}
 
             :warning: *Automatic rollback to the previous version has been initiated!* :warning:
