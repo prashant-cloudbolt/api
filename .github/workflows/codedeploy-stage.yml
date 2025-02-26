@@ -66,6 +66,29 @@ jobs:
           echo "Current Release Tag: ${{ env.release_tag }}"
           echo "Commit Hash of Tag: ${{ env.commit_hash }}"
 
+      - name: Notify Failure to Slack
+        if: ${{ inputs.codedeploy_rollback == 'True' }}
+        uses: act10ns/slack@v2.0.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+        with:
+          status: failure
+          message: |
+            :rotating_light: *QA Automation Failed* :rotating_light:
+
+            The following tests failed:
+            ':x: Stage CSMP V2 API Test Job'
+            ':x: CSMP Stage Smoke Test Runner'
+
+            :warning: *Automatic rollback to the previous version has been initiated!* :warning:
+            echo "Branch Suffix: ${{ env.branch_suffix }}"
+            echo "Current Release: ${{ env.latest_release }}"
+            echo "Current Release Tag: ${{ env.release_tag }}"
+            echo "Commit Hash of Tag: ${{ env.commit_hash }}"
+
+            Repository: ${{ github.repository }}
+            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
       - name: Trigger CodeDeploy Deployment for API
         run: |
           if [ -z "${{ env.commit_hash }}" ]; then
