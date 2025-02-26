@@ -105,3 +105,21 @@ jobs:
             echo "status=failure" >> $GITHUB_OUTPUT
           fi
 
+      - name: Notify Failure to Slack
+        if: ${{ steps.set_status.outputs.status == 'failure' }}
+        uses: act10ns/slack@v2.0.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+        with:
+          status: failure
+          message: |
+            :rotating_light: *QA Automation Failed* :rotating_light:
+
+            The following tests failed:
+            ${{ contains(needs.qa_tests.outputs.job_status, 'failure') && ':x: Stage CSMP V2 API Test Job' || ':white_check_mark: Stage CSMP V2 API Test Job' }}
+            ${{ contains(needs.qa_tests.outputs.job_status, 'failure') && ':x: CSMP Stage Smoke Test Runner' || ':white_check_mark: CSMP Stage Smoke Test Runner' }}
+
+            :warning: *Automatic rollback to the previous version has been initiated!* :warning:
+
+            Repository: ${{ github.repository }}
+            Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
