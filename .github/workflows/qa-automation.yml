@@ -3,9 +3,12 @@ name: qa-automation
 on:
   workflow_call:
     outputs:
-      job_status:
-        description: "QA Automation job status"
-        value: ${{ jobs.qa_jobs_status.outputs.job_status }}
+      csmp_v2_stage_api:
+        description: "csmp_stage_V2_api_test result"
+        value: ${{ jobs.qa_jobs_status.outputs.csmp_v2_stage_api }}
+      csmp_stage_smoke_test:
+        description: "csmp_stage_smoke_test result"
+        value: ${{ jobs.qa_jobs_status.outputs.csmp_stage_smoke_test }}
 
 permissions:
   id-token: write 
@@ -17,109 +20,129 @@ permissions:
 jobs:
   qa_tests:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        workflow_name:
-          - csmp_stage_V2_api_test.yml
-          - csmp_stage_smoke_test.yml
-
+    outputs:
+      csmp_v2_stage_api: ${{ steps.check_api_status.outputs.conclusion }}
+      csmp_stage_smoke_test: ${{ steps.check_smoke_status.outputs.conclusion }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run ${{ matrix.workflow_name }} workflow
+      - name: Run csmp_stage_V2_api_test.yml workflow
+        id: run_api_test
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh workflow run ${{ matrix.workflow_name }} --repo prashant-cloudbolt/qa-automation
+          gh workflow run csmp_stage_V2_api_test.yml --repo prashant-cloudbolt/qa-automation
           echo "Waiting 10 seconds before checking for workflow run ID..."
           sleep 10
 
-      - name: Get Workflow Run ID of ${{ matrix.workflow_name }}
-        id: get_run_id
+      - name: Get csmp_stage_V2_api_test.yml Run ID
+        id: get_api_test_run_id
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           max_attempts=10
           attempt=0
-          workflow_list=""
-
-          while [ -z "$workflow_list" ] && [ $attempt -lt $max_attempts ]; do
+          run_id=""
+          
+          while [ -z "$run_id" ] && [ $attempt -lt $max_attempts ]; do
             echo "Attempt $((attempt + 1)) to retrieve workflow run ID"
-            workflow_list=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=${{ matrix.workflow_name }} --limit=1 --json databaseId)
+            run_id=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=csmp_stage_V2_api_test.yml --limit=1 --json databaseId | jq -r '.[0].databaseId')
             
-            if [ -z "$workflow_list" ]; then
+            if [ -z "$run_id" ]; then
               echo "Workflow run ID not yet available. Retrying..."
               attempt=$((attempt + 1))
               sleep 10
-            else
-              echo "Workflow run ID retrieved successfully."
             fi
           done
 
-          if [ -z "$workflow_list" ]; then
-            echo "Failed to retrieve workflow run ID after $max_attempts attempts"
+          if [ -z "$run_id" ]; then
+            echo "Failed to retrieve workflow run ID"
             exit 1
           fi
 
-          run_id=$(echo "$workflow_list" | jq -r '.[0].databaseId')
-          echo "Run ID of ${{ matrix.workflow_name }} : $run_id"
-          echo "run_id=$run_id" >> $GITHUB_ENV
+          echo "API Test Run ID: $run_id"
+          echo "run_id_api=$run_id" >> $GITHUB_ENV
 
-      - name: Check Status of ${{ matrix.workflow_name }}
-        id: check_status
+      - name: Check Status of csmp_stage_V2_api_test.yml
+        id: check_api_status
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           status=""
           while [ "$status" != "completed" ]; do
-            status=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
-            echo "Current status: $status"
-            if [ "$status" == "completed" ]; then
-              conclusion=$(gh run view ${{ env.run_id }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
-              echo "Final conclusion: $conclusion"
-              if [ "$conclusion" != "success" ]; then
-                echo "status=failure"
-                exit 1
-              else
-                echo "status=success"
-              fi
+            status=$(gh run view ${{ env.run_id_api }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
+            echo "API Test Current Status: $status"
+            sleep 10
+          done
+
+          conclusion=$(gh run view ${{ env.run_id_api }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
+          echo "API Test Final conclusion: $conclusion"
+          echo "csmp_v2_stage_api=$conclusion" >> $GITHUB_OUTPUT
+
+      - name: Run csmp_stage_smoke_test.yml workflow
+        id: run_smoke_test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run csmp_stage_smoke_test.yml --repo prashant-cloudbolt/qa-automation
+          echo "Waiting 10 seconds before checking for workflow run ID..."
+          sleep 10
+
+      - name: Get csmp_stage_smoke_test.yml Run ID
+        id: get_smoke_test_run_id
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          max_attempts=10
+          attempt=0
+          run_id=""
+          
+          while [ -z "$run_id" ] && [ $attempt -lt $max_attempts ]; do
+            echo "Attempt $((attempt + 1)) to retrieve workflow run ID"
+            run_id=$(gh run list --repo prashant-cloudbolt/qa-automation --workflow=csmp_stage_smoke_test.yml --limit=1 --json databaseId | jq -r '.[0].databaseId')
+            
+            if [ -z "$run_id" ]; then
+              echo "Workflow run ID not yet available. Retrying..."
+              attempt=$((attempt + 1))
+              sleep 10
             fi
+          done
+
+          if [ -z "$run_id" ]; then
+            echo "Failed to retrieve workflow run ID"
+            exit 1
+          fi
+
+          echo "Smoke Test Run ID: $run_id"
+          echo "run_id_smoke=$run_id" >> $GITHUB_ENV
+
+      - name: Check Status of csmp_stage_smoke_test.yml
+        id: check_smoke_status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          status=""
+          while [ "$status" != "completed" ]; do
+            status=$(gh run view ${{ env.run_id_smoke }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
+            echo "Smoke Test Current status: $status"
             sleep 15
           done
+
+          conclusion=$(gh run view ${{ env.run_id_smoke }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
+          echo "Smoke Test Final conclusion: $conclusion"
+          echo "csmp_stage_smoke_test=$conclusion" >> $GITHUB_OUTPUT
 
   qa_jobs_status:
     needs: [qa_tests]
     runs-on: ubuntu-latest
     if: always()
     outputs:
-      job_status: ${{ steps.set_status.outputs.status }}
+      csmp_v2_stage_api: ${{ needs.qa_tests.outputs.csmp_v2_stage_api }}
+      csmp_stage_smoke_test: ${{ needs.qa_tests.outputs.csmp_stage_smoke_test }}
     steps:
       - name: Set final job status
         id: set_status
         run: |
-          if [ "${{ needs.qa_tests.result }}" == "success" ]; then
-            echo "status=success" >> $GITHUB_OUTPUT
-          else
-            echo "status=failure" >> $GITHUB_OUTPUT
-          fi
-
-      # - name: Notify Failure to Slack
-      #   if: ${{ steps.set_status.outputs.status == 'failure' }}
-      #   uses: act10ns/slack@v2.0.0
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
-      #   with:
-      #     status: failure
-      #     message: |
-      #       :rotating_light: *QA Automation Failed* :rotating_light:
-
-      #       The following tests failed:
-      #       ${{ needs.qa_tests.result == 'failure' && ':x: Stage CSMP V2 API Test Job' || ':white_check_mark: Stage CSMP V2 API Test Job' }}
-      #       ${{ needs.qa_tests.result == 'failure' && ':x: CSMP Stage Smoke Test Runner' || ':white_check_mark: CSMP Stage Smoke Test Runner' }}
-
-      #       :warning: *Automatic rollback to the previous version has been initiated!* :warning:
-
-      #       Repository: ${{ github.repository }}
-      #       Pipeline URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          echo "csmp_v2_stage_api=${{ needs.qa_tests.outputs.csmp_v2_stage_api }}" >> $GITHUB_OUTPUT
+          echo "csmp_stage_smoke_test=${{ needs.qa_tests.outputs.csmp_stage_smoke_test }}" >> $GITHUB_OUTPUT
