@@ -34,6 +34,7 @@ jobs:
     steps:
       - name: Debug QA Job Status
         run: |
+          echo "QA Job Status: ${{ needs.qa_automation.outputs.job_status }}"
           echo "QA Job Status of csmp_v2_stage_api_test: ${{ needs.qa_automation.outputs.csmp_v2_stage_api_test }}"
           echo "QA Job Status of csmp_stage_smoke_test: ${{ needs.qa_automation.outputs.csmp_stage_smoke_test }}"
 

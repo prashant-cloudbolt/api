@@ -4,11 +4,14 @@ on:
   workflow_call:
     outputs:
       csmp_v2_stage_api_test:
-        description: "csmp_stage_V2_api_test result"
+        description: "Result of csmp_stage_V2_api_test workflow"
         value: ${{ jobs.qa_jobs_status.outputs.csmp_v2_stage_api }}
       csmp_stage_smoke_test:
-        description: "csmp_stage_smoke_test result"
+        description: "Result of csmp_stage_smoke_test workflow"
         value: ${{ jobs.qa_jobs_status.outputs.csmp_stage_smoke_test }}
+      job_status:
+        description: "Overall status of the QA automation job"
+        value: ${{ jobs.qa_jobs_status.outputs.job_status }}
 
 permissions:
   id-token: write 
@@ -157,9 +160,16 @@ jobs:
     outputs:
       csmp_v2_stage_api: ${{ steps.set_status.outputs.csmp_v2_stage_api }}
       csmp_stage_smoke_test: ${{ steps.set_status.outputs.csmp_stage_smoke_test }}
+      job_status: ${{ steps.set_status.outputs.job_status }}
     steps:
       - name: Set final job status
         id: set_status
         run: |
           echo "csmp_v2_stage_api=${{ needs.csmp_stage_api.outputs.test_result }}" >> $GITHUB_OUTPUT
           echo "csmp_stage_smoke_test=${{ needs.csmp_stage_smoke.outputs.test_result }}" >> $GITHUB_OUTPUT
+
+          if [[ "${{ needs.csmp_stage_api.outputs.test_result }}" == "success" && "${{ needs.csmp_stage_smoke.outputs.test_result }}" == "success" ]]; then
+            echo "job_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "job_status=failure" >> $GITHUB_OUTPUT
+          fi
