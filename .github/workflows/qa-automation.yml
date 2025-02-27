@@ -3,7 +3,7 @@ name: qa-automation
 on:
   workflow_call:
     outputs:
-      csmp_v2_stage_api:
+      csmp_v2_stage_api_test:
         description: "csmp_stage_V2_api_test result"
         value: ${{ jobs.qa_jobs_status.outputs.csmp_v2_stage_api }}
       csmp_stage_smoke_test:

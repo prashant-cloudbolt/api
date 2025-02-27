@@ -7,7 +7,14 @@ on:
         description: "Trigger rollback in dependent workflow if value is True"
         required: false
         type: string
-
+      csmp_v2_stage_api_test_status:
+        description: "Trigger rollback in dependent workflow if value is True"
+        required: false
+        type: string
+      csmp_stage_smoke_test_status:
+        description: "Trigger rollback in dependent workflow if value is True"
+        required: false
+        type: string
 
 permissions:
   id-token: write 
@@ -77,8 +84,10 @@ jobs:
             :rotating_light: *QA Automation Failed* :rotating_light:
 
             The following tests failed:
-            :x: Stage CSMP V2 API Test Job
-            :x: CSMP Stage Smoke Test Runner
+            # :x: Stage CSMP V2 API Test Job
+            # :x: CSMP Stage Smoke Test Runner
+            ${{ inputs.codedeploy_rollback  == 'failure' && ':x: Stage CSMP V2 API Test Job' || ':white_check_mark: Stage CSMP V2 API Test Job' }}
+            ${{ inputs.codedeploy_rollback  == 'failure' && ':x: CSMP Stage Smoke Test Runner' || ':white_check_mark: CSMP Stage Smoke Test Runner' }}
 
             :warning: *Automatic rollback to the previous version has been initiated!* :warning:
             Rollback Vesion: ${{ env.release_tag }}
