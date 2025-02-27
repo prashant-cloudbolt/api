@@ -79,6 +79,11 @@ jobs:
           echo "API Test Final conclusion: $conclusion"
           echo "csmp_v2_stage_api=$conclusion" >> $GITHUB_OUTPUT
 
+          # Fail the job if the conclusion is not success
+          if [ "$conclusion" != "success" ]; then
+            exit 1
+          fi
+
   csmp_stage_smoke:
     runs-on: ubuntu-latest
     outputs:
@@ -139,6 +144,11 @@ jobs:
           conclusion=$(gh run view ${{ env.run_id_smoke }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
           echo "Smoke Test Final conclusion: $conclusion"
           echo "csmp_stage_smoke_test=$conclusion" >> $GITHUB_OUTPUT
+
+          # Fail the job if the conclusion is not success
+          if [ "$conclusion" != "success" ]; then
+            exit 1
+          fi
 
   qa_jobs_status:
     needs: [csmp_stage_api, csmp_stage_smoke]
