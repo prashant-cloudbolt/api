@@ -18,11 +18,10 @@ permissions:
   actions: read
 
 jobs:
-  qa_tests:
+  csmp_stage_api:
     runs-on: ubuntu-latest
     outputs:
-      csmp_v2_stage_api: ${{ steps.check_api_status.outputs.conclusion }}
-      csmp_stage_smoke_test: ${{ steps.check_smoke_status.outputs.conclusion }}
+      test_result: ${{ steps.check_api_status.outputs.csmp_v2_stage_api }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,6 +79,14 @@ jobs:
           echo "API Test Final conclusion: $conclusion"
           echo "csmp_v2_stage_api=$conclusion" >> $GITHUB_OUTPUT
 
+  csmp_stage_smoke:
+    runs-on: ubuntu-latest
+    outputs:
+      test_result: ${{ steps.check_smoke_status.outputs.csmp_stage_smoke_test }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Run csmp_stage_smoke_test.yml workflow
         id: run_smoke_test
         env:
@@ -126,7 +133,7 @@ jobs:
           while [ "$status" != "completed" ]; do
             status=$(gh run view ${{ env.run_id_smoke }} --repo prashant-cloudbolt/qa-automation --json status --jq '.status')
             echo "Smoke Test Current status: $status"
-            sleep 15
+            sleep 10
           done
 
           conclusion=$(gh run view ${{ env.run_id_smoke }} --repo prashant-cloudbolt/qa-automation --json conclusion --jq '.conclusion')
@@ -134,15 +141,15 @@ jobs:
           echo "csmp_stage_smoke_test=$conclusion" >> $GITHUB_OUTPUT
 
   qa_jobs_status:
-    needs: [qa_tests]
+    needs: [csmp_stage_api, csmp_stage_smoke]
     runs-on: ubuntu-latest
     if: always()
     outputs:
-      csmp_v2_stage_api: ${{ needs.qa_tests.outputs.csmp_v2_stage_api }}
-      csmp_stage_smoke_test: ${{ needs.qa_tests.outputs.csmp_stage_smoke_test }}
+      csmp_v2_stage_api: ${{ steps.set_status.outputs.csmp_v2_stage_api }}
+      csmp_stage_smoke_test: ${{ steps.set_status.outputs.csmp_stage_smoke_test }}
     steps:
       - name: Set final job status
         id: set_status
         run: |
-          echo "csmp_v2_stage_api=${{ needs.qa_tests.outputs.csmp_v2_stage_api }}" >> $GITHUB_OUTPUT
-          echo "csmp_stage_smoke_test=${{ needs.qa_tests.outputs.csmp_stage_smoke_test }}" >> $GITHUB_OUTPUT
+          echo "csmp_v2_stage_api=${{ needs.csmp_stage_api.outputs.test_result }}" >> $GITHUB_OUTPUT
+          echo "csmp_stage_smoke_test=${{ needs.csmp_stage_smoke.outputs.test_result }}" >> $GITHUB_OUTPUT
